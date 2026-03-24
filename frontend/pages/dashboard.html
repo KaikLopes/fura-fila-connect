@@ -1,0 +1,119 @@
+<!-- Modern Dashboard Page -->
+<div class="dashboard-header animate-fade-in" style="margin-bottom:24px;">
+  <div>
+    <h2 style="font-size: 1.8rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; display:flex; align-items:center; gap:12px;">
+      <i class="fa-solid fa-chart-pie" style="color:var(--primary)"></i>
+      <span id="dashGreeting">Olá!</span>
+    </h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Aqui está o panorama inteligente da sua clínica hoje.</p>
+  </div>
+</div>
+
+<!-- Hero Stats Row (Top 4) -->
+<div class="hero-stats-grid">
+  <div class="hero-stat-card card-gradient-primary animate-fade-in" style="animation-delay:.1s">
+    <div class="hero-stat-info">
+      <span class="hero-stat-label">Consultas Hoje</span>
+      <h3 id="statConsultas">—</h3>
+      <div class="hero-stat-sub"><i class="fa-solid fa-arrow-trend-up"></i> <span id="dashSemana">—</span> nesta semana</div>
+    </div>
+    <div class="hero-stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+  </div>
+
+  <div class="hero-stat-card card-gradient-success animate-fade-in" style="animation-delay:.2s">
+    <div class="hero-stat-info">
+      <span class="hero-stat-label">Faturamento Hoje</span>
+      <h3 id="dashFaturamento">—</h3>
+      <div class="hero-stat-sub"><i class="fa-solid fa-circle-check"></i> <span id="statConfirmadas">—</span> confirmadas</div>
+    </div>
+    <div class="hero-stat-icon"><i class="fa-solid fa-dollar-sign"></i></div>
+  </div>
+
+  <div class="hero-stat-card card-gradient-warning animate-fade-in" style="animation-delay:.3s">
+    <div class="hero-stat-info">
+      <span class="hero-stat-label">Pendentes na Fila</span>
+      <h3 id="statPendentes">—</h3>
+      <div class="hero-stat-sub">Fila Espera: <strong id="statFila">—</strong></div>
+    </div>
+    <div class="hero-stat-icon"><i class="fa-solid fa-clock"></i></div>
+  </div>
+
+  <div class="hero-stat-card card-gradient-info animate-fade-in" style="animation-delay:.4s">
+    <div class="hero-stat-info">
+      <span class="hero-stat-label">Horários Livres</span>
+      <h3 id="statDisponiveis">—</h3>
+      <div class="hero-stat-sub"><i class="fa-solid fa-door-open"></i> Próx: <strong id="statProxVago">—</strong></div>
+    </div>
+    <div class="hero-stat-icon"><i class="fa-solid fa-bed-pulse"></i></div>
+  </div>
+</div>
+
+<!-- Main Double Column -->
+<div class="dashboard-split">
+  
+  <!-- Left Column: Insights -->
+  <div class="dashboard-col">
+    <div class="modern-card animate-fade-in" style="animation-delay:.5s">
+      <div class="modern-card-header">
+        <h3><i class="fa-solid fa-bolt" style="color:var(--warning);"></i> Insights de Eficiência</h3>
+      </div>
+      <div class="modern-card-body">
+        
+        <!-- Insight 1 -->
+        <div class="insight-row">
+          <div class="insight-header">
+            <div class="insight-title"><i class="fa-solid fa-heart-pulse" style="color:var(--success);"></i> Taxa de Recuperação Inteligente</div>
+            <div class="insight-value" id="statTaxa" style="color:var(--success); font-weight:700; font-size:1.1rem;">—</div>
+          </div>
+          <div class="insight-bar-bg"><div class="insight-bar-fill bg-success" id="barTaxa" style="width: 0%;"></div></div>
+          <div class="insight-meta">
+            <span>Cancelamentos: <strong id="statCancelamentos">—</strong></span>
+            <span>Recuperadas: <strong id="statRecuperadas">—</strong></span>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid var(--border); margin:20px 0;">
+
+        <!-- Insight 2: Ranking -->
+        <div class="insight-row">
+          <div class="insight-header">
+            <div class="insight-title"><i class="fa-solid fa-trophy" style="color:var(--warning);"></i> Top Serviços Solicitados</div>
+          </div>
+          <div id="rankingServicos" style="display:flex; flex-direction:column; gap:8px;">
+            <div class="empty-state" style="padding:10px;"><i class="fa-solid fa-spinner fa-spin"></i></div>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid var(--border); margin:20px 0;">
+
+        <!-- AI Warning -->
+        <div class="ai-warning-box">
+          <div class="ai-warning-icon"><i class="fa-solid fa-circle-exclamation"></i> Alerta FuraFila Connect</div>
+          <div class="ai-warning-text">
+            O profissional com mais cancelamentos recorrentes nos últimos 30 dias é o 
+            <strong id="statProfTop" style="color:var(--danger);">—</strong>. 
+            Recomendamos acionar confirmação por WhatsApp para a agenda dele.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Schedule -->
+  <div class="dashboard-col">
+    <div class="modern-card animate-fade-in" style="animation-delay:.6s">
+      <div class="modern-card-header">
+        <h3><i class="fa-regular fa-calendar-check" style="color:var(--primary);"></i> Próximas Consultas Hoje</h3>
+        <button class="btn btn-ghost btn-sm" onclick="window.location.hash='agenda'">Ver Agenda <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+      <div class="modern-card-body" style="padding: 0;">
+        <div id="dashProximas">
+          <div class="empty-state" style="padding:40px 20px;"><i class="fa-solid fa-spinner fa-spin"></i><p>Sincronizando...</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+

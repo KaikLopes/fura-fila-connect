@@ -1,0 +1,103 @@
+<!-- Configurações Page Partial — 3 tabs -->
+<div class="card">
+  <div style="display:flex;border-bottom:1px solid var(--border);background:#fafbfc;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+    <button class="cfg-tab active" data-tab="clinica" style="flex:1;padding:14px;border:none;background:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:0.9rem;color:var(--text-muted);border-bottom:2px solid transparent;transition:all .2s;">
+      <i class="fa-solid fa-building"></i> Clínica
+    </button>
+    <button class="cfg-tab" data-tab="conta" style="flex:1;padding:14px;border:none;background:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:0.9rem;color:var(--text-muted);border-bottom:2px solid transparent;transition:all .2s;">
+      <i class="fa-solid fa-user"></i> Minha Conta
+    </button>
+    <button class="cfg-tab" data-tab="seguranca" style="flex:1;padding:14px;border:none;background:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:0.9rem;color:var(--text-muted);border-bottom:2px solid transparent;transition:all .2s;">
+      <i class="fa-solid fa-shield-halved"></i> Segurança
+    </button>
+  </div>
+
+  <!-- TAB: Clínica -->
+  <div class="card-body cfg-panel" id="panelClinica">
+
+    <div class="config-section">
+      <h4><i class="fa-regular fa-clock"></i> Horário de Funcionamento</h4>
+      <div class="form-row">
+        <div class="form-group"><label>Abertura</label><input type="time" class="form-input" id="cfgAbertura" value="08:00"></div>
+        <div class="form-group"><label>Fechamento</label><input type="time" class="form-input" id="cfgFechamento" value="18:00"></div>
+        <div class="form-group"><label>Duração da Consulta</label>
+          <select class="form-input" id="cfgDuracao">
+            <option value="15">15 minutos</option>
+            <option value="20">20 minutos</option>
+            <option value="30" selected>30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60">60 minutos</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="config-section">
+      <h4><i class="fa-regular fa-calendar"></i> Dias de Funcionamento</h4>
+      <div class="days-grid" id="cfgDiasGrid">
+        <div class="day-toggle active" data-dia="Segunda">Seg</div>
+        <div class="day-toggle active" data-dia="Terca">Ter</div>
+        <div class="day-toggle active" data-dia="Quarta">Qua</div>
+        <div class="day-toggle active" data-dia="Quinta">Qui</div>
+        <div class="day-toggle active" data-dia="Sexta">Sex</div>
+        <div class="day-toggle" data-dia="Sabado">Sáb</div>
+        <div class="day-toggle" data-dia="Domingo">Dom</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="cfgSaveBtnClinica">
+      <i class="fa-solid fa-save"></i> Salvar Configurações
+    </button>
+  </div>
+
+  <!-- TAB: Minha Conta -->
+  <div class="card-body cfg-panel hidden" id="panelConta">
+    <div class="config-section">
+      <h4><i class="fa-solid fa-user-pen"></i> Informações da Conta</h4>
+      <div class="form-row">
+        <div class="form-group"><label>Nome da Clínica</label><input class="form-input" id="cfgClinica" placeholder="Clínica Santa Terezinha"></div>
+        <div class="form-group"><label>Email</label><input type="email" class="form-input" id="cfgEmail" placeholder="seu@email.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>CNPJ</label><input class="form-input" id="cfgCnpj" placeholder="00.000.000/0000-00"></div>
+        <div class="form-group"><label>WhatsApp Oficial</label><input class="form-input" id="cfgWhatsApp" placeholder="558399990000"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="cfgSaveBtnConta">
+      <i class="fa-solid fa-save"></i> Salvar Alterações
+    </button>
+  </div>
+
+  <!-- TAB: Segurança -->
+  <div class="card-body cfg-panel hidden" id="panelSeguranca">
+    <div class="config-section">
+      <h4><i class="fa-solid fa-lock"></i> Alterar Senha</h4>
+      <div class="form-group">
+        <label>Senha Atual</label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" id="cfgSenhaAtual" placeholder="••••••••">
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('cfgSenhaAtual', this)"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Nova Senha</label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" id="cfgNovaSenha" placeholder="Mínimo de 6 caracteres" minlength="6">
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('cfgNovaSenha', this)"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirmar Nova Senha</label>
+        <div class="password-wrapper">
+          <input type="password" class="form-input" id="cfgConfirmarSenha" placeholder="••••••••">
+          <i class="fa-solid fa-eye toggle-password" onclick="togglePassword('cfgConfirmarSenha', this)"></i>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="cfgSaveBtnSenha">
+      <i class="fa-solid fa-key"></i> Alterar Senha
+    </button>
+  </div>
+</div>

@@ -1,0 +1,47 @@
+<!-- Profissionais Page Partial -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+  <h2 style="font-size:1.5rem;font-weight:700;"><i class="fa-solid fa-user-doctor" style="color:var(--primary)"></i> Profissionais da Clínica</h2>
+  <button class="btn btn-primary" id="btnAddProf"><i class="fa-solid fa-plus"></i> Novo Profissional</button>
+</div>
+
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>CRM</th><th>Especialidade</th><th>Serviços</th><th>Telefone</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="profTbody">
+        <tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Carregando...</p></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="profModal" class="modal-overlay hidden">
+  <div class="modal-glass animate-modal-in">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-user-doctor"></i> <span id="profModalTitle">Novo Profissional</span></h3>
+      <button class="modal-close" id="profModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="profForm">
+        <input type="hidden" id="profId">
+        <div class="form-group"><label>Nome Completo*</label><input class="form-input" id="profNome" required placeholder="João Silva"></div>
+        <div class="form-row">
+          <div class="form-group"><label>CRM*</label><input class="form-input" id="profCrm" placeholder="00000-PB" required></div>
+          <div class="form-group"><label>Especialidade*</label><input class="form-input" id="profEspecialidade" placeholder="Ortodontia, Clínico Geral..." required></div>
+        </div>
+        <div class="form-group"><label>Telefone</label><input class="form-input" id="profTelefone" placeholder="(83) 99999-0000"></div>
+        <div class="form-group">
+          <label>Serviços Oferecidos* <small style="color:var(--text-muted)">(separe por vírgula)</small></label>
+          <input class="form-input" id="profServicos" placeholder="Limpeza, Clareamento, Extração, Canal" required>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="profModalCancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="profSaveBtn"><i class="fa-solid fa-save"></i> Salvar</button>
+    </div>
+  </div>
+</div>

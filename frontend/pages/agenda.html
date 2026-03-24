@@ -1,0 +1,219 @@
+<!-- Agenda Page Partial -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <h2 style="font-size:1.5rem;font-weight:700;"><i class="fa-regular fa-calendar-check" style="color:var(--primary)"></i> Agenda Clínica</h2>
+    <div class="badge badge-warning" id="agendaFilaCount" style="padding:6px 12px; font-size:0.9rem;"><i class="fa-solid fa-users"></i> Fila: 0</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="btn btn-ghost" id="btnOpenQueue" style="border:1px solid var(--border);"><i class="fa-solid fa-list-ol"></i> Fila de Espera</button>
+    <button class="btn btn-primary" id="btnAddSlot"><i class="fa-solid fa-plus"></i> Novo Agendamento</button>
+  </div>
+</div>
+
+<!-- Week Day Picker -->
+<div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;" id="weekPicker"></div>
+
+<div style="display:grid; grid-template-columns: 1fr 300px; gap:20px; align-items: start;" id="agendaGridMain">
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fa-regular fa-calendar-check"></i> <span id="agendaDayLabel">Atendimentos</span></h3>
+      <span class="badge badge-info" id="agendaSlotCount"></span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Horário</th>
+            <th>Paciente</th>
+            <th>Serviço</th>
+            <th>Profissional</th>
+            <th>Status / Ação</th>
+          </tr>
+        </thead>
+        <tbody id="agendaTbody">
+          <tr><td colspan="5" class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Carregando...</p></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sidebar: Fila de Espera do Dia -->
+  <div class="card" id="sidebarFila" style="max-height: 600px; overflow-y: auto;">
+    <div class="card-header" style="background: var(--bg-alt);">
+      <h4 style="font-size:0.9rem; margin:0;"><i class="fa-solid fa-users-viewfinder"></i> Fila do Dia</h4>
+    </div>
+    <div id="filaEsperaList" style="padding:10px;">
+        <div class="empty-state" style="padding:20px 0;"><p style="font-size:0.75rem;">Fila vazia</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Novo Agendamento -->
+<div id="slotModal" class="modal-overlay hidden">
+  <div class="modal-glass animate-modal-in">
+    <div class="modal-header">
+      <h3><i class="fa-regular fa-calendar-plus"></i> Novo Agendamento</h3>
+      <button class="modal-close" id="slotModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Data</label>
+          <select class="form-input" id="slotData"></select>
+        </div>
+        <div class="form-group"><label>Horário Disponível*</label>
+          <select class="form-input" id="slotHorario"><option value="">Selecione a data primeiro</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Profissional*</label>
+        <select class="form-input" id="slotProfissional"><option value="">— Selecione um profissional —</option></select>
+      </div>
+      <div class="form-group" style="position:relative;">
+        <label>Paciente* <small style="color:var(--text-muted)">(digite para buscar ou cadastrar novo)</small></label>
+        <input class="form-input" id="slotCliente" placeholder="Buscar por nome, CPF ou telefone..." autocomplete="off" required>
+        <input type="hidden" id="slotClienteId">
+        <div id="slotClienteDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);max-height:180px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.12);"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Serviço*</label>
+          <select class="form-input" id="slotServico"><option value="">Selecione o profissional primeiro</option></select>
+        </div>
+        <div class="form-group"><label>Telefone</label><input class="form-input" id="slotTelefone" placeholder="(83) 99999-0000"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="slotModalCancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="slotSaveBtn"><i class="fa-solid fa-save"></i> Agendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Fila de Espera -->
+<div id="queueModal" class="modal-overlay hidden">
+  <div class="modal-glass animate-modal-in" style="max-width:400px;">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-person-walking-arrow-right"></i> Colocar na Fila</h3>
+      <button class="modal-close" id="queueModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">O paciente será notificado caso surja uma vaga de cancelamento hoje.</p>
+        <div class="form-group" style="position:relative;">
+            <label>Paciente*</label>
+            <input class="form-input" id="queueClienteInput" placeholder="Buscar paciente..." autocomplete="off">
+            <input type="hidden" id="queueClienteId">
+            <div id="queueClienteDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);max-height:150px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.12);"></div>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="queueModalCancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="queueSaveBtn"><i class="fa-solid fa-plus"></i> Entrar na Fila</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Checkout Médico -->
+<div id="checkoutModal" class="modal-overlay hidden">
+  <div class="modal-glass animate-modal-in">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-file-invoice-dollar" style="color:var(--success)"></i> Finalizar Consulta</h3>
+      <button class="modal-close" id="checkoutModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--bg); padding:12px; border-radius:var(--radius-sm); margin-bottom:16px;">
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:4px;">Paciente</p>
+        <p style="font-weight:600; color:var(--text-dark);" id="checkoutPacienteNome">—</p>
+      </div>
+      
+      <input type="hidden" id="checkoutSlotId">
+      <input type="hidden" id="checkoutClienteId">
+      <input type="hidden" id="checkoutProfissionalId">
+      <input type="hidden" id="checkoutTelefoneBackup">
+
+      <div class="form-group">
+        <label>Procedimentos Realizados</label>
+        <input class="form-input" id="checkoutProcedimentos" placeholder="Ex: Limpeza, Extração...">
+      </div>
+      
+      <div class="form-group">
+        <label>Valor Cobrado (R$)</label>
+        <input type="number" step="0.01" class="form-input" id="checkoutValor" placeholder="150.00" value="0.00">
+      </div>
+
+      <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; color:var(--text-dark);">
+          <input type="checkbox" id="checkoutToggleRetorno" style="width:16px; height:16px; accent-color:var(--primary);">
+          Agendar Retorno Médico
+        </label>
+        
+        <div id="checkoutRetornoBox" style="display:none; margin-top:12px; background:var(--bg); padding:16px; border-radius:var(--radius-sm); border:1px solid var(--border);">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Data do Retorno</label>
+              <select class="form-input" id="checkoutRetornoData"></select>
+            </div>
+            <div class="form-group">
+              <label>Horário Disponível</label>
+              <select class="form-input" id="checkoutRetornoHorario"><option value="">Selecione a data primeiro</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="checkoutModalCancelBtn">Cancelar</button>
+      <button class="btn btn-success" id="checkoutSaveBtn"><i class="fa-solid fa-check-double"></i> Concluir Atendimento</button>
+    </div>
+  </div>
+</div>
+
+<!-- WhatsApp Modal -->
+<div id="waModal" class="modal-overlay hidden">
+  <div class="modal-glass animate-modal-in" style="max-width:440px;">
+    <div class="wa-header">
+      <button id="waCloseBtn" class="wa-back-btn"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="wa-contact-info" style="margin-left:12px;">
+        <h4 id="waName">Paciente</h4>
+        <span>online</span>
+      </div>
+      <div class="wa-icons">
+        <i class="fa-solid fa-video"></i>
+        <i class="fa-solid fa-phone"></i>
+      </div>
+    </div>
+
+    <div class="wa-chat-area">
+      <div class="wa-date-divider">HOJE</div>
+      <div class="wa-message-container">
+        <div class="wa-message-bubble">
+          <div class="wa-message-sender">Você</div>
+          <textarea id="waMessageText" class="wa-message-textarea" rows="6"></textarea>
+          <div class="wa-message-meta"><span id="waTime">00:00</span> <i class="fa-solid fa-check-double" style="color:#53bdeb;"></i></div>
+        </div>
+      </div>
+        <div class="ai-insight" style="display:none;">
+          <i class="fa-solid fa-brain"></i> <span>Tática:</span>
+          <select id="waAiTactic" class="wa-select-tactic"></select>
+        </div>
+    </div>
+
+    <div class="wa-footer-action">
+      <button id="waSendBtn" class="btn btn-success btn-block"><i class="fa-brands fa-whatsapp"></i> Enviar Mensagem</button>
+      <button id="waCancelBtn" class="btn btn-ghost btn-block" style="margin-top:4px;">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Detalhes da Consulta -->
+<div id="detailsModal" class="modal-overlay hidden">
+  <div class="modal-glass animate-modal-in" style="max-width:500px;">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-circle-info" style="color:var(--primary)"></i> Detalhes do Atendimento</h3>
+      <button class="modal-close" id="detailsModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="detailsModalBody">
+      <!-- Preenchido via JS -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="detailsModalOkBtn">Entendido</button>
+    </div>
+  </div>
+</div>

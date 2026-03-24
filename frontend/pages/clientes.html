@@ -1,0 +1,96 @@
+<!-- Clientes Page Partial -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+  <h2 style="font-size:1.5rem;font-weight:700;"><i class="fa-solid fa-users" style="color:var(--primary)"></i> Pacientes Cadastrados</h2>
+  <button class="btn btn-primary" id="btnAddCliente"><i class="fa-solid fa-plus"></i> Novo Paciente</button>
+</div>
+
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>CPF</th><th>Nascimento</th><th>Telefone</th><th>Consultas</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="clientesTbody">
+        <tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Carregando...</p></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: Novo/Editar Paciente -->
+<div id="clienteModal" class="modal-overlay hidden">
+  <div class="modal-glass animate-modal-in" style="max-width:640px;">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-user"></i> <span id="clienteModalTitle">Novo Paciente</span></h3>
+      <button class="modal-close" id="clienteModalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" style="max-height:60vh;overflow-y:auto;">
+      <form id="clienteForm">
+        <input type="hidden" id="clienteId">
+
+        <!-- Section 1: Dados Pessoais -->
+        <div class="config-section">
+          <h4><i class="fa-solid fa-id-card"></i> Dados Pessoais</h4>
+          <div class="form-row">
+            <div class="form-group" style="flex:2"><label>Nome Completo*</label><input class="form-input" id="clienteNome" required placeholder="Maria da Silva"></div>
+            <div class="form-group" style="flex:1"><label>CPF*</label><input class="form-input" id="clienteCpf" required placeholder="000.000.000-00" maxlength="14"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Data de Nascimento</label><input type="date" class="form-input" id="clienteNascimento"></div>
+            <div class="form-group"><label>Sexo</label>
+              <select class="form-input" id="clienteSexo">
+                <option value="">— Selecione —</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Telefone*</label><input class="form-input" id="clienteTelefone" required placeholder="(83) 99999-0000"></div>
+            <div class="form-group"><label>Endereço</label><input class="form-input" id="clienteEndereco" placeholder="Rua Central, 123 - Sousa/PB"></div>
+          </div>
+        </div>
+
+        <!-- Section 2: Saúde -->
+        <div class="config-section">
+          <h4><i class="fa-solid fa-heart-pulse"></i> Saúde</h4>
+          <div class="form-group"><label>Tipo Sanguíneo</label>
+              <select class="form-input" id="clienteSangue">
+                <option value="">— Selecione —</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option>
+                <option>O+</option><option>O-</option>
+              </select>
+          </div>
+          <div class="form-group"><label>Alergias</label><input class="form-input" id="clienteAlergias" placeholder="Nenhuma / Penicilina, Látex..."></div>
+          <div class="form-group"><label>Observações Médicas</label><textarea class="form-input" id="clienteObs" rows="2" placeholder="Condições pré-existentes, medicamentos..."></textarea></div>
+        </div>
+
+        <!-- Section 3: Responsável (menor de idade) -->
+        <div class="config-section" id="secResponsavel" style="display:none;">
+          <h4><i class="fa-solid fa-child"></i> Responsável <span class="badge badge-warning" style="font-size:0.7rem;vertical-align:middle;">Menor de Idade</span></h4>
+          <div class="form-row">
+            <div class="form-group" style="flex:2"><label>Nome do Responsável*</label><input class="form-input" id="clienteRespNome" placeholder="João da Silva"></div>
+            <div class="form-group"><label>CPF do Responsável</label><input class="form-input" id="clienteRespCpf" placeholder="000.000.000-00" maxlength="14"></div>
+          </div>
+          <div class="form-group"><label>Telefone do Responsável</label><input class="form-input" id="clienteRespTel" placeholder="(83) 99999-0000"></div>
+        </div>
+
+        <!-- Section 4: Contato de Emergência -->
+        <div class="config-section">
+          <h4><i class="fa-solid fa-phone-volume"></i> Contato de Emergência</h4>
+          <div class="form-row">
+            <div class="form-group" style="flex:2"><label>Nome</label><input class="form-input" id="clienteEmergNome" placeholder="José da Silva"></div>
+            <div class="form-group"><label>Telefone</label><input class="form-input" id="clienteEmergTel" placeholder="(83) 99999-0000"></div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="clienteModalCancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="clienteSaveBtn"><i class="fa-solid fa-save"></i> Salvar</button>
+    </div>
+  </div>
+</div>

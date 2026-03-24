@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro | FuraFila Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <i class="fa-solid fa-staff-snake"></i>
+        <h1>FuraFila<span> Connect</span></h1>
+        <p>Cadastre sua clínica para começar</p>
+      </div>
+
+      <div class="auth-error" id="authError">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="authErrorText"></span>
+      </div>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="clinica">Nome da Clínica*</label>
+          <input type="text" id="regClinica" class="form-input" placeholder="Clínica Santa Terezinha" required>
+        </div>
+          <div class="form-group" style="flex:1;">
+            <label>CNPJ*</label>
+            <input type="text" id="regCnpj" class="form-input" placeholder="00.000.000/0000-00" required>
+          </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="regEmail" class="form-input" placeholder="seu@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <div style="position: relative;">
+            <input type="password" id="regSenha" class="form-input" placeholder="Mínimo de 6 caracteres" required minlength="6" style="padding-right: 40px;">
+            <button type="button" onclick="togglePassword('regSenha', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="btnRegister" style="margin-top: 8px;">
+          <i class="fa-solid fa-user-plus"></i> Criar Conta
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Já tem uma conta? <a href="login.html">Faça login</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/registrar.js"></script>
+</body>
+</html>

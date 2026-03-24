@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FuraFila Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/global.css?v=3">
+  <link rel="stylesheet" href="css/components.css?v=3">
+  <link rel="stylesheet" href="css/pages.css?v=3">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <i class="fa-solid fa-staff-snake"></i>
+      <h2>FuraFila<span> Connect</span></h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="sidebar-link active" data-page="dashboard">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </button>
+      <button class="sidebar-link" data-page="agenda">
+        <i class="fa-regular fa-calendar-check"></i> Agenda
+      </button>
+      <button class="sidebar-link" data-page="profissionais">
+        <i class="fa-solid fa-user-doctor"></i> Profissionais
+      </button>
+      <button class="sidebar-link" data-page="clientes">
+        <i class="fa-solid fa-users"></i> Clientes
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="userAvatar">U</div>
+        <div class="sidebar-user-info">
+          <div class="name" id="userName">Usuário</div>
+          <div class="role" id="userClinica">Clínica</div>
+        </div>
+      </div>
+      <button class="sidebar-link" id="btnThemeToggle" style="margin-bottom: 4px;">
+        <i class="fa-solid fa-moon" id="themeIcon"></i> <span id="themeText">Modo Escuro</span>
+      </button>
+      <button class="sidebar-link" data-page="configuracoes" style="margin-bottom: 4px;">
+        <i class="fa-solid fa-gear"></i> Configurações
+      </button>
+      <button class="sidebar-link" id="btnLogout" style="color: #ef4444;">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="top-bar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn btn-ghost btn-icon" id="btnHamburger" style="display:none;">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h2 id="pageTitle">Dashboard</h2>
+      </div>
+      <div class="top-bar-actions">
+        <span class="badge badge-primary" id="topBarDate">Hoje</span>
+      </div>
+    </header>
+
+    <div class="page-content" id="pageContent">
+      <!-- Dynamic content loaded here -->
+      <div style="text-align:center;padding:60px;color:var(--text-muted);">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:2rem;"></i>
+        <p style="margin-top:12px;">Carregando...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/auth.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
+</body>
+</html>
