@@ -1,6 +1,6 @@
 # Fura-Fila Connect
 
-O Fura-Fila Connect é um sistema de agendamento de horários projetado para otimizar a gestão de compromissos entre profissionais e clientes. A plataforma permite que profissionais configurem seus horários de atendimento e que clientes marquem e gerenciem seus agendamentos de forma simples e intuitiva.
+O Fura-Fila Connect é um sistema de agendamento de horários projetado para otimizar a gestão de compromissos entre profissionais e clientes. A plataforma permite que profissionais configurem seus horários de atendimento e marquem e gerenciem seus agendamentos de forma simples e intuitiva.
 
 ## Funcionalidades
 
