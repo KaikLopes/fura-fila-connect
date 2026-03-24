@@ -2,7 +2,7 @@
 
 O Fura-Fila Connect é um sistema de agendamento de horários projetado para otimizar a gestão de compromissos entre profissionais e clientes. A plataforma permite que profissionais configurem seus horários de atendimento e que clientes marquem e gerenciem seus agendamentos de forma simples e intuitiva.
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 - **Gestão de Profissionais:** Cadastro e gerenciamento de perfis de profissionais.
 - **Gestão de Clientes:** Cadastro e gerenciamento de perfis de clientes.
@@ -10,7 +10,7 @@ O Fura-Fila Connect é um sistema de agendamento de horários projetado para oti
 - **Dashboard:** Painel com um resumo das principais métricas e informações relevantes.
 - **Autenticação Segura:** Sistema de login e registro com autenticação baseada em JWT (JSON Web Tokens).
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 O projeto é dividido em duas partes principais: o **Backend**, que é a API RESTful responsável pela lógica de negócio, e o **Frontend**, que é a interface com a qual o usuário interage.
 
@@ -30,7 +30,7 @@ O projeto é dividido em duas partes principais: o **Backend**, que é a API RES
 - **CSS3:** Para a estilização dos componentes e layout.
 - **JavaScript (Vanilla):** Para a manipulação do DOM e lógica da interface, sem a utilização de frameworks.
 
-## ⚙️ Como Executar o Projeto
+## Como Executar o Projeto
 
 Siga os passos abaixo para executar o projeto em seu ambiente local.
 
@@ -75,9 +75,9 @@ O servidor estará em execução em `http://localhost:3000`.
 
 ### 2. Acessando o Frontend
 
-Não há um processo de build para o frontend. Basta abrir os arquivos `.html` (como `login.html`, `registrar.html` ou `index.html`) diretamente no seu navegador. A aplicação se conectará ao backend que está em execução localmente.
+Não há um processo de build para o frontend. Basta abrir os arquivos `.html` (como `login.html`, `registrar.html` ou `app.html`) diretamente no seu navegador. A aplicação se conectará ao backend que está em execução localmente.
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 fura-fila-connect/
@@ -92,6 +92,7 @@ fura-fila-connect/
 │   ├── js/                 # Scripts JavaScript para cada página
 │   ├── pages/              # Páginas HTML da aplicação
 │   ├── app.html            # Estrutura principal da aplicação
-│   └── login.html          # Página de login
+│   ├── login.html          # Página de login
+│   └── registrar.html      # Página de registro
 └── Obsidian_FuraFila_Connect/ # Documentação e anotações do projeto
 ```
