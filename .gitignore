@@ -18,6 +18,7 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+.obsidian/
 
 # OS generated files
 .DS_Store
