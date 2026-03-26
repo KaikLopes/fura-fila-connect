@@ -3,10 +3,37 @@ registerPage('profissionais', async function () {
   const modal = document.getElementById('profModal');
   const form = document.getElementById('profForm');
 
+  // ═══════════ SEARCH / FILTER ═══════════
+  const searchInput = document.getElementById('profSearch');
+  let searchTimeout = null;
+  let allProfissionais = [];
+
   async function load() {
     const data = await apiFetch('/profissionais');
     if (!data) return;
-    render(data.profissionais || []);
+    allProfissionais = data.profissionais || [];
+    render(allProfissionais);
+  }
+
+  // Search functionality
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      const q = searchInput.value.trim().toLowerCase();
+
+      if (q.length < 2) {
+        render(allProfissionais);
+        return;
+      }
+
+      // Local search on loaded data
+      const filtered = allProfissionais.filter(p =>
+        p.nome.toLowerCase().includes(q) ||
+        (p.especialidade && p.especialidade.toLowerCase().includes(q)) ||
+        (p.crm && p.crm.toLowerCase().includes(q))
+      );
+      render(filtered);
+    });
   }
 
   function render(list) {
@@ -45,7 +72,11 @@ registerPage('profissionais', async function () {
       }
 
       if (btnDel) {
-        if (!confirm('Remover este profissional?')) return;
+        const confirmed = await confirmAction(
+          'Remover Profissional',
+          'Tem certeza que deseja remover este profissional? Esta ação não pode ser desfeita.'
+        );
+        if (!confirmed) return;
         const id = btnDel.dataset.del;
         const res = await apiFetch(`/profissionais/${id}`, { method: 'DELETE' });
         if (res && res.sucesso) {

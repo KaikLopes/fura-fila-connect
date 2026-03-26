@@ -1,7 +1,13 @@
 <!-- Profissionais Page Partial -->
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
   <h2 style="font-size:1.5rem;font-weight:700;"><i class="fa-solid fa-user-doctor" style="color:var(--primary)"></i> Profissionais da Clínica</h2>
-  <button class="btn btn-primary" id="btnAddProf"><i class="fa-solid fa-plus"></i> Novo Profissional</button>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div style="position:relative;">
+      <i class="fa-solid fa-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+      <input type="text" id="profSearch" class="form-input" placeholder="Buscar profissionais..." style="padding-left:36px;width:220px;">
+    </div>
+    <button class="btn btn-primary" id="btnAddProf"><i class="fa-solid fa-plus"></i> Novo Profissional</button>
+  </div>
 </div>
 
 <div class="card">
