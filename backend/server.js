@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 
 const autenticar = require('./middleware/auth');
 
@@ -18,16 +20,34 @@ const PORT = process.env.PORT || 3000;
 
 // ── Middleware Global ────────────────────────────────────────────────
 app.use(cors({
-  origin: [
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
-    'http://localhost:3001',
-    'http://127.0.0.1:3001',
-    'null',
-  ],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    // Remove 'null' to prevent local file access
+    const allowedOrigins = [
+      'http://localhost:5500',
+      'http://127.0.0.1:5500',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3001',
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origin não permitida pelo CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
 app.use(express.json());
+app.use(cookieParser());
+
+// ── Rate Limiting para rotas protegidas ─────────────────────────────
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 120, // 120 requests por minuto por IP
+  message: { erro: 'Muitas requisições. Aguarde um momento.' }
+});
 
 // ── Servir Frontend Estático ─────────────────────────────────────────
 app.get('/', (req, res) => res.redirect('/login.html'));
@@ -37,11 +57,11 @@ app.use(express.static(path.join(__dirname, '..', 'frontend')));
 app.use('/api/auth', authRoutes);
 
 // ── Rotas Protegidas (necessitam JWT) ────────────────────────────────
-app.use('/api/agenda', autenticar, agendaRoutes);
-app.use('/api/profissionais', autenticar, profissionaisRoutes);
-app.use('/api/clientes', autenticar, clientesRoutes);
-app.use('/api/dashboard', autenticar, dashboardRoutes);
-app.use('/api/configuracoes', autenticar, configuracoesRoutes);
+app.use('/api/agenda', apiLimiter, autenticar, agendaRoutes);
+app.use('/api/profissionais', apiLimiter, autenticar, profissionaisRoutes);
+app.use('/api/clientes', apiLimiter, autenticar, clientesRoutes);
+app.use('/api/dashboard', apiLimiter, autenticar, dashboardRoutes);
+app.use('/api/configuracoes', apiLimiter, autenticar, configuracoesRoutes);
 
 // ── Health check ─────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
