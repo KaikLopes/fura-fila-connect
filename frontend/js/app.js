@@ -126,7 +126,6 @@
 
   // Sidebar collapse
   const btnCollapse = document.getElementById('btnCollapseSidebar');
-  const sidebar = document.getElementById('sidebar');
   const collapseIcon = document.getElementById('sidebarCollapseIcon');
   const collapseText = document.getElementById('sidebarCollapseText');
   const mainContent = document.querySelector('.main-content');

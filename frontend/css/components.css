@@ -54,11 +54,18 @@ select.form-input { cursor: pointer; appearance: none; background-image: url("da
 
 .sidebar.collapsed {
   width: 70px;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.sidebar:not(.collapsed) {
+  z-index: 50;
 }
 
 .sidebar.collapsed .sidebar-brand h2,
 .sidebar.collapsed .sidebar-brand span,
 .sidebar.collapsed .sidebar-user-info,
+.sidebar.collapsed .sidebar-user,
 .sidebar.collapsed .sidebar-link span:not(.fa-solid):not(.fa-regular) {
   display: none;
 }
@@ -66,6 +73,10 @@ select.form-input { cursor: pointer; appearance: none; background-image: url("da
 .sidebar.collapsed .sidebar-brand {
   justify-content: center;
   padding: 24px 10px;
+}
+
+.sidebar.collapsed .sidebar-brand i {
+  margin: 0 auto;
 }
 
 .sidebar.collapsed .sidebar-nav {
@@ -122,6 +133,8 @@ select.form-input { cursor: pointer; appearance: none; background-image: url("da
 .main-content {
   margin-left: var(--sidebar-width); min-height: 100vh; padding: 0;
   transition: margin-left 0.3s ease;
+  position: relative;
+  z-index: 10;
 }
 
 .top-bar {
