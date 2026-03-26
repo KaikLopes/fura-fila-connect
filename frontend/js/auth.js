@@ -50,18 +50,21 @@ async function tryRefreshToken() {
       setRefreshToken(data.refreshToken);
       return true;
     }
-  } catch (err) {
-    console.error('Erro ao renovar token:', err);
+  } catch (err) {}
   }
   return false;
 }
 
 async function apiFetch(endpoint, options = {}) {
   const token = getToken();
-  if (!token) { logout(); return null; }
+  if (!token) { 
+    logout(); 
+    return null; 
+  }
 
   try {
-    const res = await fetch(API_BASE + endpoint, {
+    const url = API_BASE + endpoint;
+    const res = await fetch(url, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -69,6 +72,8 @@ async function apiFetch(endpoint, options = {}) {
         ...(options.headers || {}),
       },
     });
+    
+    console.log('[apiFetch] Status:', res.status);
 
     if (res.status === 401) {
       // Tentar renovar o token
@@ -85,14 +90,18 @@ async function apiFetch(endpoint, options = {}) {
           },
         });
         if (retryRes.status === 401) { logout(); return null; }
-        return await retryRes.json();
+        const data = await retryRes.json();
+        console.log('[apiFetch] Retorno após refresh:', data);
+        return data;
       }
       logout();
       return null;
     }
-    return await res.json();
+    const data = await res.json();
+    console.log('[apiFetch] Resposta:', data?.sucesso ? 'OK' : 'ERRO');
+    return data;
   } catch (err) {
-    console.error('API Error:', err);
+    console.error('[apiFetch] Exceção:', err.message);
     return null;
   }
 }

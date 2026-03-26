@@ -4,8 +4,6 @@
  */
 (function () {
   if (!requireAuth()) return;
-
-  const pageContent = document.getElementById('pageContent');
   const pageTitle = document.getElementById('pageTitle');
   const links = document.querySelectorAll('.sidebar-link[data-page]');
   const btnLogout = document.getElementById('btnLogout');
@@ -133,16 +131,15 @@
   if (btnCollapse) {
     btnCollapse.addEventListener('click', () => {
       sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('collapsed');
       if (sidebar.classList.contains('collapsed')) {
         collapseIcon.classList.remove('fa-chevron-left');
         collapseIcon.classList.add('fa-chevron-right');
         collapseText.textContent = 'Expandir';
-        mainContent.style.marginLeft = '70px';
       } else {
         collapseIcon.classList.remove('fa-chevron-right');
         collapseIcon.classList.add('fa-chevron-left');
         collapseText.textContent = 'Recolher';
-        mainContent.style.marginLeft = '';
       }
       localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     });
@@ -150,10 +147,10 @@
     // Restore collapsed state
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
       sidebar.classList.add('collapsed');
+      mainContent.classList.add('collapsed');
       collapseIcon.classList.remove('fa-chevron-left');
       collapseIcon.classList.add('fa-chevron-right');
       collapseText.textContent = 'Expandir';
-      mainContent.style.marginLeft = '70px';
     }
   }
 
