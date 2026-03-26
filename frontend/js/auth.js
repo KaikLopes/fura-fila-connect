@@ -2,10 +2,22 @@ const API_BASE = 'http://localhost:3000/api';
 
 function getToken() { return localStorage.getItem('token'); }
 function setToken(t) { localStorage.setItem('token', t); }
+function getRefreshToken() { return localStorage.getItem('refreshToken'); }
+function setRefreshToken(t) { localStorage.setItem('refreshToken', t); }
 function getUsuario() { try { return JSON.parse(localStorage.getItem('usuario')); } catch { return null; } }
 
 function logout() {
+  const refreshToken = getRefreshToken();
+  // Revogar token no servidor (não bloqueia se falhar)
+  if (refreshToken) {
+    fetch(API_BASE + '/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    }).catch(() => {});
+  }
   localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
   localStorage.removeItem('usuario');
   window.location.href = 'login.html';
 }
@@ -16,6 +28,32 @@ function requireAuth() {
     return false;
   }
   return true;
+}
+
+// Tenta renovar o token automaticamente
+async function tryRefreshToken() {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return false;
+
+  try {
+    const res = await fetch(API_BASE + '/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken })
+    });
+
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    if (data.sucesso) {
+      setToken(data.token);
+      setRefreshToken(data.refreshToken);
+      return true;
+    }
+  } catch (err) {
+    console.error('Erro ao renovar token:', err);
+  }
+  return false;
 }
 
 async function apiFetch(endpoint, options = {}) {
@@ -32,7 +70,26 @@ async function apiFetch(endpoint, options = {}) {
       },
     });
 
-    if (res.status === 401) { logout(); return null; }
+    if (res.status === 401) {
+      // Tentar renovar o token
+      const renewed = await tryRefreshToken();
+      if (renewed) {
+        // Retry request com novo token
+        const newToken = getToken();
+        const retryRes = await fetch(API_BASE + endpoint, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + newToken,
+            ...(options.headers || {}),
+          },
+        });
+        if (retryRes.status === 401) { logout(); return null; }
+        return await retryRes.json();
+      }
+      logout();
+      return null;
+    }
     return await res.json();
   } catch (err) {
     console.error('API Error:', err);

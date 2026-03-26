@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       setToken(data.token);
+      if (data.refreshToken) {
+        setRefreshToken(data.refreshToken);
+      }
       localStorage.setItem('usuario', JSON.stringify(data.usuario));
       window.location.href = 'app.html';
     } catch (err) {
