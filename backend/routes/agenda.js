@@ -1,6 +1,6 @@
 const express = require('express');
 const pool = require('../db/pool');
-const { formatPhoneBR } = require('../utils/formatters');
+const { formatPhoneBR, isValidDate } = require('../utils/formatters');
 
 const router = express.Router();
 
@@ -120,6 +120,7 @@ router.get('/horarios-disponiveis', async (req, res) => {
     const dataParam = req.query.data || new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10);
     const profId = req.query.profissional_id;
     if (!profId) return res.status(400).json({ erro: 'profissional_id é obrigatório.' });
+    if (!isValidDate(dataParam)) return res.status(400).json({ erro: 'Data inválida. Use formato YYYY-MM-DD.' });
 
     // Get business config
     const cfgResult = await pool.query(
@@ -193,7 +194,8 @@ router.get('/horarios-disponiveis', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const dataParam = req.query.data || new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10);
-    
+    if (!isValidDate(dataParam)) return res.status(400).json({ erro: 'Data inválida. Use formato YYYY-MM-DD.' });
+
     // Auto-timeout
     if (dataParam === new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10)) {
       const expiredSlots = await pool.query(
@@ -227,12 +229,18 @@ router.post('/', async (req, res) => {
     if (!horario) return res.status(400).json({ erro: 'Horário é obrigatório.' });
 
     const dataSlot = data || new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10);
+    if (!isValidDate(dataSlot)) return res.status(400).json({ erro: 'Data inválida. Use formato YYYY-MM-DD.' });
 
     // 1. Validar se o horário é no passado (se for hoje)
     const hojeIso = new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10);
     if (dataSlot === hojeIso) {
       const brTimeString = new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
-      if (horario < brTimeString) {
+      // Converter para minutos para comparação correta
+      const [hAgendar, mAgendar] = horario.split(':').map(Number);
+      const [hAtual, mAtual] = brTimeString.split(':').map(Number);
+      const minAgendar = hAgendar * 60 + (mAgendar || 0);
+      const minAtual = hAtual * 60 + mAtual;
+      if (minAgendar < minAtual) {
         return res.status(400).json({ erro: 'Não é possível agendar um horário no passado.' });
       }
     }
@@ -306,7 +314,8 @@ router.post('/', async (req, res) => {
 router.get('/status', async (req, res) => {
   try {
     const dataParam = req.query.data || new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10);
-    
+    if (!isValidDate(dataParam)) return res.status(400).json({ erro: 'Data inválida. Use formato YYYY-MM-DD.' });
+
     // Auto-timeout
     if (dataParam === new Date().toLocaleString('en-CA', { timeZone: 'America/Sao_Paulo' }).slice(0, 10)) {
       const expiredSlots = await pool.query(
@@ -581,6 +590,10 @@ async function processarProximoFila(slotId, usuarioId, horarioStr, servicoStr, t
 
   // scoring (continua igual para achar o mais adequado da FILA)
   const resultado = selecionarMelhor(filaComHistorico, horarioStr, servicoStr);
+  if (!resultado || !resultado.cliente) {
+    await pool.query(`UPDATE agenda SET status = 'Cancelado', recuperacao_expira_em = NULL WHERE id = $1`, [slotId]);
+    return null;
+  }
   const escolhido = resultado.cliente;
 
   await pool.query(
