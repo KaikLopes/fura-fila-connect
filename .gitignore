@@ -28,4 +28,9 @@ yarn-error.log*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+
+# Temporary test and backup files
+backend/test-db.js
+backend/create-test-user.js
+backend/routes/dashboard-old.js
 Thumbs.db
