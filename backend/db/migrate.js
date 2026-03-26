@@ -104,6 +104,58 @@ CREATE TABLE IF NOT EXISTS logs_atividade (
   criado_em  TIMESTAMP DEFAULT NOW()
 );
 
+-- ═══════════════════════════════════════════
+--  INDEXES DE PERFORMANCE
+-- ═══════════════════════════════════════════
+
+-- Agenda: consultas por usuário, data e profissional
+CREATE INDEX IF NOT EXISTS idx_agenda_usuario_data ON agenda(usuario_id, data, profissional_id);
+CREATE INDEX IF NOT EXISTS idx_agenda_data_horario ON agenda(data, horario);
+CREATE INDEX IF NOT EXISTS idx_agenda_cliente_id ON agenda(cliente_id);
+CREATE INDEX IF NOT EXISTS idx_agenda_status ON agenda(status);
+
+-- Clientes: busca por usuário e CPF
+CREATE INDEX IF NOT EXISTS idx_clientes_usuario_id ON clientes(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_clientes_cpf ON clientes((regexp_replace(cpf, '\\D', '', 'g')));
+
+-- Histórico: consultas por cliente
+CREATE INDEX IF NOT EXISTS idx_historico_cliente_id ON historico_consultas(cliente_id, data DESC);
+
+-- Profissionais: busca por usuário
+CREATE INDEX IF NOT EXISTS idx_profissionais_usuario_id ON profissionais(usuario_id);
+
+-- Fila de espera: busca por usuário e posição
+CREATE INDEX IF NOT EXISTS idx_fila_espera_usuario_posicao ON fila_espera(usuario_id, posicao);
+
+-- Logs de atividade: buscas por usuário e data
+CREATE INDEX IF NOT EXISTS idx_logs_usuario_data ON logs_atividade(usuario_id, criado_em DESC);
+
+-- Constraint unique para evitar agendamento duplo no mesmo horário/profissional
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'uk_agenda_concorrencia'
+  ) THEN
+    ALTER TABLE agenda ADD CONSTRAINT uk_agenda_concorrencia
+      UNIQUE (usuario_id, profissional_id, data, horario);
+  END IF;
+END
+$$;
+
+-- ═══════════════════════════════════════════
+--  TABELA: refresh_tokens
+-- ═══════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id          SERIAL PRIMARY KEY,
+  usuario_id  INT REFERENCES usuarios(id) ON DELETE CASCADE,
+  token       VARCHAR(255) UNIQUE NOT NULL,
+  expires_at  TIMESTAMP NOT NULL,
+  created_at  TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_usuario ON refresh_tokens(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token);
+
 `;
 
 async function migrate() {
@@ -119,6 +171,8 @@ async function migrate() {
     console.log('   • fila_espera');
     console.log('   • configuracoes');
     console.log('   • logs_atividade');
+    console.log('   • indexes de performance');
+    console.log('   • constraint uk_agenda_concorrencia');
   } catch (err) {
     console.error('❌ Erro na migração:', err.message);
   } finally {
