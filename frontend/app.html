@@ -37,6 +37,9 @@
     </nav>
 
     <div class="sidebar-footer">
+      <button class="sidebar-link" id="btnCollapseSidebar" style="margin-bottom: 4px;">
+        <i class="fa-solid fa-chevron-left" id="sidebarCollapseIcon"></i> <span id="sidebarCollapseText">Recolher</span>
+      </button>
       <div class="sidebar-user">
         <div class="sidebar-avatar" id="userAvatar">U</div>
         <div class="sidebar-user-info">
@@ -81,6 +84,21 @@
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal hidden" id="confirmModal" style="z-index:1000;">
+    <div class="modal-content" style="max-width:400px;text-align:center;padding:24px;">
+      <div style="margin-bottom:16px;">
+        <i class="fa-solid fa-circle-exclamation" style="font-size:3rem;color:var(--warning);"></i>
+      </div>
+      <h3 id="confirmTitle" style="margin-bottom:8px;">Confirmar Ação</h3>
+      <p id="confirmMessage" style="color:var(--text-muted);margin-bottom:24px;">Tem certeza que deseja continuar?</p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button class="btn btn-ghost" id="confirmCancelBtn">Cancelar</button>
+        <button class="btn btn-danger" id="confirmOkBtn" style="background:var(--danger);color:#fff;">Confirmar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="js/auth.js?v=5"></script>

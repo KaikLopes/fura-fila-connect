@@ -49,7 +49,40 @@ select.form-input { cursor: pointer; appearance: none; background-image: url("da
   position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh;
   background: var(--sidebar-bg); color: var(--sidebar-text);
   display: flex; flex-direction: column; z-index: 50;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, width 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar.collapsed .sidebar-brand h2,
+.sidebar.collapsed .sidebar-brand span,
+.sidebar.collapsed .sidebar-user-info,
+.sidebar.collapsed .sidebar-link span:not(.fa-solid):not(.fa-regular) {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-brand {
+  justify-content: center;
+  padding: 24px 10px;
+}
+
+.sidebar.collapsed .sidebar-nav {
+  padding: 16px 8px;
+}
+
+.sidebar.collapsed .sidebar-link {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar.collapsed .sidebar-footer {
+  padding: 12px 8px;
+}
+
+.sidebar.collapsed .btnCollapseSidebar {
+  justify-content: center;
 }
 
 .sidebar-brand {
@@ -88,6 +121,7 @@ select.form-input { cursor: pointer; appearance: none; background-image: url("da
 /* ── Main Content Area ────────────────────── */
 .main-content {
   margin-left: var(--sidebar-width); min-height: 100vh; padding: 0;
+  transition: margin-left 0.3s ease;
 }
 
 .top-bar {

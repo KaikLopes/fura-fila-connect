@@ -124,6 +124,40 @@
   // Logout
   btnLogout.addEventListener('click', logout);
 
+  // Sidebar collapse
+  const btnCollapse = document.getElementById('btnCollapseSidebar');
+  const sidebar = document.getElementById('sidebar');
+  const collapseIcon = document.getElementById('sidebarCollapseIcon');
+  const collapseText = document.getElementById('sidebarCollapseText');
+  const mainContent = document.querySelector('.main-content');
+
+  if (btnCollapse) {
+    btnCollapse.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      if (sidebar.classList.contains('collapsed')) {
+        collapseIcon.classList.remove('fa-chevron-left');
+        collapseIcon.classList.add('fa-chevron-right');
+        collapseText.textContent = 'Expandir';
+        mainContent.style.marginLeft = '70px';
+      } else {
+        collapseIcon.classList.remove('fa-chevron-right');
+        collapseIcon.classList.add('fa-chevron-left');
+        collapseText.textContent = 'Recolher';
+        mainContent.style.marginLeft = '';
+      }
+      localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    });
+
+    // Restore collapsed state
+    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+      sidebar.classList.add('collapsed');
+      collapseIcon.classList.remove('fa-chevron-left');
+      collapseIcon.classList.add('fa-chevron-right');
+      collapseText.textContent = 'Expandir';
+      mainContent.style.marginLeft = '70px';
+    }
+  }
+
   // Global utility for XSS protection
   window.escapeHTML = function (str) {
     if (!str) return '';
@@ -165,6 +199,49 @@
     toast.innerHTML = `<i class="fa-solid ${icon}" style="color:${type === 'error' ? 'var(--danger)' : 'var(--success)'}"></i> ${message}`;
     container.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+  };
+
+  // Confirmation Modal system
+  window.confirmAction = function(title, message) {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('confirmModal');
+      const titleEl = document.getElementById('confirmTitle');
+      const msgEl = document.getElementById('confirmMessage');
+      const okBtn = document.getElementById('confirmOkBtn');
+      const cancelBtn = document.getElementById('confirmCancelBtn');
+
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+      modal.classList.remove('hidden');
+
+      const handleOk = () => {
+        cleanup();
+        resolve(true);
+      };
+      const handleCancel = () => {
+        cleanup();
+        resolve(false);
+      };
+      const handleKey = (e) => {
+        if (e.key === 'Escape') handleCancel();
+      };
+      const handleClick = (e) => {
+        if (e.target === modal) handleCancel();
+      };
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        okBtn.removeEventListener('click', handleOk);
+        cancelBtn.removeEventListener('click', handleCancel);
+        document.removeEventListener('keydown', handleKey);
+        modal.removeEventListener('click', handleClick);
+      };
+
+      okBtn.addEventListener('click', handleOk);
+      cancelBtn.addEventListener('click', handleCancel);
+      document.addEventListener('keydown', handleKey);
+      modal.addEventListener('click', handleClick);
+    });
   };
 
   // Initial page from hash or default
