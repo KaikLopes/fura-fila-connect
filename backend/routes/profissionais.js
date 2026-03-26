@@ -4,14 +4,39 @@ const { formatPhoneBR } = require('../utils/formatters');
 
 const router = express.Router();
 
-// GET /api/profissionais
+// GET /api/profissionais (paginação)
+// Query params: ?page=1&limit=20
 router.get('/', async (req, res) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = (page - 1) * limit;
+
     const result = await pool.query(
-      'SELECT * FROM profissionais WHERE usuario_id = $1 ORDER BY nome LIMIT 250',
+      'SELECT * FROM profissionais WHERE usuario_id = $1 ORDER BY nome LIMIT $2 OFFSET $3',
+      [req.usuarioId, limit, offset]
+    );
+
+    // Contar total
+    const countResult = await pool.query(
+      'SELECT COUNT(*) as total FROM profissionais WHERE usuario_id = $1',
       [req.usuarioId]
     );
-    res.json({ sucesso: true, profissionais: result.rows });
+    const total = parseInt(countResult.rows[0].total);
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      sucesso: true,
+      profissionais: result.rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    });
   } catch (err) {
     console.error('Erro listar profissionais:', err.message);
     res.status(500).json({ erro: 'Falha ao listar profissionais.' });
@@ -21,9 +46,13 @@ router.get('/', async (req, res) => {
 // GET /api/profissionais/:id/servicos — serviços de um profissional
 router.get('/:id/servicos', async (req, res) => {
   try {
+    const profId = parseInt(req.params.id);
+    if (isNaN(profId) || profId <= 0) {
+      return res.status(400).json({ erro: 'ID de profissional inválido.' });
+    }
     const result = await pool.query(
       'SELECT servicos FROM profissionais WHERE id = $1 AND usuario_id = $2',
-      [req.params.id, req.usuarioId]
+      [profId, req.usuarioId]
     );
     if (result.rows.length === 0) return res.status(404).json({ erro: 'Profissional não encontrado.' });
     res.json({ sucesso: true, servicos: result.rows[0].servicos || [] });
@@ -67,6 +96,10 @@ router.post('/', async (req, res) => {
 // PUT /api/profissionais/:id
 router.put('/:id', async (req, res) => {
   try {
+    const profId = parseInt(req.params.id);
+    if (isNaN(profId) || profId <= 0) {
+      return res.status(400).json({ erro: 'ID de profissional inválido.' });
+    }
     const { nome, especialidade, telefone, dias_atendimento, servicos, crm } = req.body;
     
     // Prevenção de duplicatas ao alterar nome
@@ -94,7 +127,7 @@ router.put('/:id', async (req, res) => {
         servicos = COALESCE($5, servicos),
         crm = COALESCE($6, crm)
        WHERE id = $7 AND usuario_id = $8 RETURNING *`,
-      [nome, especialidade, formatPhoneBR(telefone), dias_atendimento, servicos, crm, req.params.id, req.usuarioId]
+      [nome, especialidade, formatPhoneBR(telefone), dias_atendimento, servicos, crm, profId, req.usuarioId]
     );
 
     if (result.rows.length === 0) {
@@ -112,6 +145,9 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const profId = parseInt(req.params.id);
+    if (isNaN(profId) || profId <= 0) {
+      return res.status(400).json({ erro: 'ID de profissional inválido.' });
+    }
     const result = await pool.query(
       'DELETE FROM profissionais WHERE id = $1 AND usuario_id = $2 RETURNING id',
       [profId, req.usuarioId]

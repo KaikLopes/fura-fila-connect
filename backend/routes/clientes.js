@@ -13,23 +13,52 @@ const CAMPOS = [
   'responsavel_nome', 'responsavel_cpf', 'responsavel_tel'
 ];
 
-// GET /api/clientes — lista com histórico
+// GET /api/clientes — lista com histórico (paginação)
+// Query params: ?page=1&limit=20
 router.get('/', async (req, res) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = (page - 1) * limit;
+
+    // Query otimizada com JOIN para evitar N+1
     const clientes = await pool.query(
-      'SELECT * FROM clientes WHERE usuario_id = $1 ORDER BY nome LIMIT 250',
-      [req.usuarioId]
+      `SELECT c.*,
+        COALESCE(
+          json_agg(
+            json_build_object('id', h.id, 'data', h.data, 'servico', h.servico)
+          ) FILTER (WHERE h.id IS NOT NULL),
+          '[]'
+        ) as historico_consultas
+      FROM clientes c
+      LEFT JOIN historico_consultas h ON h.cliente_id = c.id
+      WHERE c.usuario_id = $1
+      GROUP BY c.id
+      ORDER BY c.nome
+      LIMIT $2 OFFSET $3`,
+      [req.usuarioId, limit, offset]
     );
 
-    const comHistorico = await Promise.all(clientes.rows.map(async (c) => {
-      const hist = await pool.query(
-        'SELECT id, data, servico FROM historico_consultas WHERE cliente_id = $1 ORDER BY data DESC',
-        [c.id]
-      );
-      return { ...c, historico_consultas: hist.rows };
-    }));
+    // Contar total de clientes
+    const countResult = await pool.query(
+      'SELECT COUNT(*) as total FROM clientes WHERE usuario_id = $1',
+      [req.usuarioId]
+    );
+    const total = parseInt(countResult.rows[0].total);
+    const totalPages = Math.ceil(total / limit);
 
-    res.json({ sucesso: true, clientes: comHistorico });
+    res.json({
+      sucesso: true,
+      clientes: clientes.rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    });
   } catch (err) {
     console.error('Erro listar clientes:', err.message);
     res.status(500).json({ erro: 'Falha ao listar clientes.' });
@@ -101,11 +130,15 @@ router.post('/', async (req, res) => {
 // PUT /api/clientes/:id
 router.put('/:id', async (req, res) => {
   try {
+    const clienteId = parseInt(req.params.id);
+    if (isNaN(clienteId) || clienteId <= 0) {
+      return res.status(400).json({ erro: 'ID de cliente inválido.' });
+    }
     const { cpf } = req.body;
 
     // Prevenção de duplicatas CPF
     if (cpf) {
-      const checkCpf = await pool.query('SELECT id FROM clientes WHERE regexp_replace(cpf, \'\\D\', \'\', \'g\') = regexp_replace($1, \'\\D\', \'\', \'g\') AND usuario_id = $2 AND id != $3', [cpf, req.usuarioId, req.params.id]);
+      const checkCpf = await pool.query('SELECT id FROM clientes WHERE regexp_replace(cpf, \'\\D\', \'\', \'g\') = regexp_replace($1, \'\\D\', \'\', \'g\') AND usuario_id = $2 AND id != $3', [cpf, req.usuarioId, clienteId]);
       if (checkCpf.rows.length > 0) {
         return res.status(409).json({ erro: 'Já existe um paciente cadastrado com este CPF.' });
       }
@@ -121,7 +154,7 @@ router.put('/:id', async (req, res) => {
     const result = await pool.query(
       `UPDATE clientes SET ${sets}
        WHERE id = $${CAMPOS.length + 1} AND usuario_id = $${CAMPOS.length + 2} RETURNING *`,
-      [...vals, req.params.id, req.usuarioId]
+      [...vals, clienteId, req.usuarioId]
     );
 
     if (result.rows.length === 0) {
@@ -139,6 +172,9 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const clienteId = parseInt(req.params.id);
+    if (isNaN(clienteId) || clienteId <= 0) {
+      return res.status(400).json({ erro: 'ID de cliente inválido.' });
+    }
     const result = await pool.query(
       'DELETE FROM clientes WHERE id = $1 AND usuario_id = $2 RETURNING id',
       [clienteId, req.usuarioId]
