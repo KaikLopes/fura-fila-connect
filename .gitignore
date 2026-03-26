@@ -19,6 +19,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 .obsidian/
+.claude
 
 # OS generated files
 .DS_Store

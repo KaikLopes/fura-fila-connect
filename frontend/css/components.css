@@ -48,25 +48,25 @@ select.form-input { cursor: pointer; appearance: none; background-image: url("da
 .sidebar {
   position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh;
   background: var(--sidebar-bg); color: var(--sidebar-text);
-  display: flex; flex-direction: column; z-index: 50;
+  display: flex; flex-direction: column; z-index: 1000;
   transition: transform 0.3s ease, width 0.3s ease;
 }
 
 .sidebar.collapsed {
   width: 70px;
-  z-index: 50;
+  z-index: 1000;
   overflow: hidden;
 }
 
 .sidebar:not(.collapsed) {
-  z-index: 50;
+  z-index: 1000;
 }
 
 .sidebar.collapsed .sidebar-brand h2,
 .sidebar.collapsed .sidebar-brand span,
 .sidebar.collapsed .sidebar-user-info,
-.sidebar.collapsed .sidebar-user,
-.sidebar.collapsed .sidebar-link span:not(.fa-solid):not(.fa-regular) {
+.sidebar.collapsed .sidebar-link span,
+.sidebar.collapsed .sidebar-user {
   display: none;
 }
 
@@ -83,10 +83,7 @@ select.form-input { cursor: pointer; appearance: none; background-image: url("da
   padding: 16px 8px;
 }
 
-.sidebar.collapsed .sidebar-link {
-  justify-content: center;
-  padding: 12px;
-}
+
 
 .sidebar.collapsed .sidebar-footer {
   padding: 12px 8px;
@@ -135,6 +132,10 @@ select.form-input { cursor: pointer; appearance: none; background-image: url("da
   transition: margin-left 0.3s ease;
   position: relative;
   z-index: 10;
+}
+
+.main-content.collapsed {
+  margin-left: 70px;
 }
 
 .top-bar {
