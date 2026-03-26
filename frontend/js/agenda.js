@@ -8,6 +8,7 @@ registerPage('agenda', async function () {
   }
 
   let selectedDate = getLocalISO(new Date());
+  let weekOffset = 0; // 0 = semana atual, -1 = semana passada, +1 = próxima semana
 
   // ═══════════ WEEK PICKER ═══════════
   const weekPicker = document.getElementById('weekPicker');
@@ -15,16 +16,29 @@ registerPage('agenda', async function () {
 
   function buildWeekPicker() {
     weekPicker.innerHTML = '';
+
+    // Botão semana anterior
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'btn btn-sm btn-ghost';
+    prevBtn.style.cssText = 'min-width:40px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);';
+    prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+    prevBtn.title = 'Semana anterior';
+    prevBtn.addEventListener('click', () => {
+      weekOffset--;
+      buildWeekPicker();
+      loadAgenda();
+    });
+    weekPicker.appendChild(prevBtn);
+
     const today = new Date();
-    const dayOfWeek = today.getDay();
-    // Start from today instead of last Monday
     const startDay = new Date(today);
+    startDay.setDate(today.getDate() + (weekOffset * 7));
 
     for (let i = 0; i < 7; i++) {
       const d = new Date(startDay);
       d.setDate(startDay.getDate() + i);
       const iso = getLocalISO(d);
-      const isToday = i === 0;
+      const isToday = iso === getLocalISO(new Date());
       const isSelected = iso === selectedDate;
 
       const btn = document.createElement('button');
@@ -48,6 +62,19 @@ registerPage('agenda', async function () {
       });
       weekPicker.appendChild(btn);
     }
+
+    // Botão próxima semana
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'btn btn-sm btn-ghost';
+    nextBtn.style.cssText = 'min-width:40px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);';
+    nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+    nextBtn.title = 'Próxima semana';
+    nextBtn.addEventListener('click', () => {
+      weekOffset++;
+      buildWeekPicker();
+      loadAgenda();
+    });
+    weekPicker.appendChild(nextBtn);
   }
   buildWeekPicker();
 
@@ -452,6 +479,12 @@ registerPage('agenda', async function () {
 
   // ═══════════ CANCEL + RECOVERY ═══════════
   async function handleCancel(id, btn) {
+    const confirmed = await confirmAction(
+      'Cancelar Agendamento',
+      'Tem certeza que deseja cancelar este agendamento? A vaga será oferecida ao próximo da fila.'
+    );
+    if (!confirmed) return;
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
@@ -792,7 +825,12 @@ registerPage('agenda', async function () {
   }
 
   window.removeFromFila = async (id) => {
-    if (!confirm('Remover este paciente da fila?')) return;
+    const confirmed = await confirmAction(
+      'Remover da Fila',
+      'Tem certeza que deseja remover este paciente da fila de espera?'
+    );
+    if (!confirmed) return;
+
     const result = await apiFetch(`/agenda/fila/${id}`, { method: 'DELETE' });
     if (result && result.sucesso) {
       showToast('Removido da fila.');
