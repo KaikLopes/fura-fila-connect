@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/global.css?v=3">
-  <link rel="stylesheet" href="css/components.css?v=3">
+  <link rel="stylesheet" href="css/components.css?v=5">
   <link rel="stylesheet" href="css/pages.css?v=3">
 </head>
 <body>
@@ -23,16 +23,16 @@
 
     <nav class="sidebar-nav">
       <button class="sidebar-link active" data-page="dashboard">
-        <i class="fa-solid fa-chart-pie"></i> Dashboard
+        <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
       </button>
       <button class="sidebar-link" data-page="agenda">
-        <i class="fa-regular fa-calendar-check"></i> Agenda
+        <i class="fa-regular fa-calendar-check"></i> <span>Agenda</span>
       </button>
       <button class="sidebar-link" data-page="profissionais">
-        <i class="fa-solid fa-user-doctor"></i> Profissionais
+        <i class="fa-solid fa-user-doctor"></i> <span>Profissionais</span>
       </button>
       <button class="sidebar-link" data-page="clientes">
-        <i class="fa-solid fa-users"></i> Clientes
+        <i class="fa-solid fa-users"></i> <span>Clientes</span>
       </button>
     </nav>
 
@@ -51,10 +51,10 @@
         <i class="fa-solid fa-moon" id="themeIcon"></i> <span id="themeText">Modo Escuro</span>
       </button>
       <button class="sidebar-link" data-page="configuracoes" style="margin-bottom: 4px;">
-        <i class="fa-solid fa-gear"></i> Configurações
+        <i class="fa-solid fa-gear"></i> <span>Configurações</span>
       </button>
       <button class="sidebar-link" id="btnLogout" style="color: #ef4444;">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Sair</span>
       </button>
     </div>
   </aside>
@@ -102,6 +102,11 @@
 
   <!-- Scripts -->
   <script src="js/auth.js?v=5"></script>
-  <script src="js/app.js?v=5"></script>
+  <script src="js/app.js?v=6"></script>
+  <script src="js/dashboard.js?v=3"></script>
+  <script src="js/agenda.js?v=3"></script>
+  <script src="js/profissionais.js?v=3"></script>
+  <script src="js/clientes.js?v=3"></script>
+  <script src="js/configuracoes.js?v=3"></script>
 </body>
 </html>
