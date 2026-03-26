@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
 const autenticar = require('../middleware/auth');
 const rateLimit = require('express-rate-limit');
+const { createTokenPair, refreshAccessToken, revokeRefreshToken, revokeAllUserTokens } = require('../utils/tokens');
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
@@ -12,6 +13,23 @@ const authLimiter = rateLimit({
 });
 
 const router = express.Router();
+
+// Helper para definir cookie com atributos de segurança
+function setRefreshTokenCookie(res, token, expiresAt) {
+  const expires = new Date(expiresAt);
+  res.cookie('refreshToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+    expires: expires
+  });
+}
+
+// Helper para limpar cookie de refresh token
+function clearRefreshTokenCookie(res) {
+  res.clearCookie('refreshToken', { path: '/' });
+}
 
 // ─── POST /api/auth/registrar ───────────────────────────────────────
 router.post('/registrar', authLimiter, async (req, res) => {
@@ -43,13 +61,18 @@ router.post('/registrar', authLimiter, async (req, res) => {
       [novoUsuario.id, clinica_nome || '']
     );
 
-    const token = jwt.sign(
-      { id: novoUsuario.id, email: novoUsuario.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '8h' }
-    );
+    // Gerar par de tokens
+    const tokens = await createTokenPair(novoUsuario.id, novoUsuario.email);
 
-    res.status(201).json({ sucesso: true, token, usuario: novoUsuario });
+    // Definir refresh token como cookie httpOnly
+    setRefreshTokenCookie(res, tokens.refreshToken, tokens.expiresAt);
+
+    res.status(201).json({
+      sucesso: true,
+      token: tokens.accessToken,
+      expiresAt: tokens.expiresAt,
+      usuario: novoUsuario
+    });
   } catch (err) {
     console.error('Erro ao registrar:', err.message);
     res.status(500).json({ erro: 'Falha ao registrar usuário.' });
@@ -81,17 +104,18 @@ router.post('/login', authLimiter, async (req, res) => {
       return res.status(401).json({ erro: 'Email ou senha incorretos.' });
     }
 
-    const token = jwt.sign(
-      { id: usuario.id, email: usuario.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '8h' }
-    );
+    // Gerar par de tokens
+    const tokens = await createTokenPair(usuario.id, usuario.email);
+
+    // Definir refresh token como cookie httpOnly
+    setRefreshTokenCookie(res, tokens.refreshToken, tokens.expiresAt);
 
     const { id, clinica_nome, email: userEmail, cnpj } = usuario;
 
     res.json({
       sucesso: true,
-      token,
+      token: tokens.accessToken,
+      expiresAt: tokens.expiresAt,
       usuario: { id, clinica_nome, email: userEmail, cnpj },
     });
   } catch (err) {
@@ -184,6 +208,53 @@ router.put('/senha', autenticar, async (req, res) => {
   } catch (err) {
     console.error('Erro alterar senha:', err.message);
     res.status(500).json({ erro: 'Falha ao alterar senha.' });
+  }
+});
+
+// ─── POST /api/auth/refresh ───────────────────────────────────────────
+// Renovação de tokens usando refresh token
+router.post('/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ erro: 'Refresh token é obrigatório.' });
+    }
+
+    const newTokens = await refreshAccessToken(refreshToken);
+
+    if (!newTokens) {
+      return res.status(401).json({ erro: 'Refresh token inválido ou expirado. Faça login novamente.' });
+    }
+
+    res.json({
+      sucesso: true,
+      token: newTokens.accessToken,
+      expiresAt: newTokens.expiresAt
+    });
+  } catch (err) {
+    console.error('Erro ao refresh:', err.message);
+    res.status(500).json({ erro: 'Falha ao renovar sessão.' });
+  }
+});
+
+// ─── POST /api/auth/logout ───────────────────────────────────────────
+// Revogar refresh token (logout)
+router.post('/logout', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (refreshToken) {
+      await revokeRefreshToken(refreshToken);
+    }
+
+    // Limpar cookie de refresh token
+    clearRefreshTokenCookie(res);
+
+    res.json({ sucesso: true, mensagem: 'Logout realizado com sucesso.' });
+  } catch (err) {
+    console.error('Erro ao logout:', err.message);
+    res.status(500).json({ erro: 'Falha ao fazer logout.' });
   }
 });
 
