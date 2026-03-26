@@ -17,11 +17,36 @@ registerPage('clientes', async function () {
   }
   document.getElementById('clienteNascimento').addEventListener('change', checkMenor);
 
-  // ═══════════ LOAD ═══════════
+  // ═══════════ SEARCH / FILTER ═══════════
+  const searchInput = document.getElementById('clienteSearch');
+  let searchTimeout = null;
+  let allClientes = [];
+
   async function load() {
     const data = await apiFetch('/clientes');
     if (!data) return;
-    render(data.clientes || []);
+    allClientes = data.clientes || [];
+    render(allClientes);
+  }
+
+  // Search functionality
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      const q = searchInput.value.trim();
+
+      if (q.length < 2) {
+        render(allClientes);
+        return;
+      }
+
+      searchTimeout = setTimeout(async () => {
+        const result = await apiFetch(`/clientes/busca?q=${encodeURIComponent(q)}`);
+        if (result && result.clientes) {
+          render(result.clientes);
+        }
+      }, 300);
+    });
   }
 
   function formatDate(d) {
@@ -80,7 +105,11 @@ registerPage('clientes', async function () {
       }
 
       if (btnDel) {
-        if (!confirm('Remover este paciente?')) return;
+        const confirmed = await confirmAction(
+          'Remover Paciente',
+          'Tem certeza que deseja remover este paciente? Esta ação não pode ser desfeita.'
+        );
+        if (!confirmed) return;
         const id = btnDel.dataset.del;
         const res = await apiFetch(`/clientes/${id}`, { method: 'DELETE' });
         if (res && res.sucesso) {
