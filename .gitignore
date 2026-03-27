@@ -21,6 +21,9 @@ yarn-error.log*
 .obsidian/
 .claude
 
+# MCP configuration (contains credentials)
+.mcp.json
+
 # OS generated files
 .DS_Store
 .DS_Store?
