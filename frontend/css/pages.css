@@ -36,6 +36,8 @@
 .auth-footer a:hover { text-decoration: underline; }
 
 .auth-error { background: var(--danger-light); color: var(--danger); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
+.auth-success { background: var(--success-light); color: var(--success); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
+.auth-footer .forgot-password { color: var(--primary); font-weight: 500; font-size: 0.9rem; }
 
 /* ── Dashboard page ───────────────────────── */
 .dashboard-welcome { margin-bottom: 28px; }
