@@ -6,7 +6,12 @@
       "Bash(curl:*)",
       "Bash(psql:*)",
       "Bash(node db/migrate.js)",
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "WebSearch",
+      "WebFetch(domain:docs.bswen.com)",
+      "Bash(claude mcp:*)",
+      "Bash(pg_isready -h localhost -p 5432 -U postgres)",
+      "Bash(node -e \"const { Pool } = require\\(''pg''\\); const pool = new Pool\\({ connectionString: ''postgresql://postgres:lopes9@localhost:5432/furafila'' }\\); pool.query\\(''SELECT 1''\\).then\\(\\(\\) => { console.log\\(''DB OK''\\); pool.end\\(\\); }\\).catch\\(e => { console.log\\(''DB Error:'', e.message\\); pool.end\\(\\); }\\);\")"
     ]
   }
 }
