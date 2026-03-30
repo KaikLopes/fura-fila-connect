@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova Senha | FuraFila Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <i class="fa-solid fa-staff-snake"></i>
+        <h1>FuraFila<span> Connect</span></h1>
+        <p>Digite o código e sua nova senha</p>
+      </div>
+
+      <div class="auth-error" id="authError" style="display: none;">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="authErrorText"></span>
+      </div>
+
+      <div class="auth-success" id="authSuccess" style="display: none;">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="authSuccessText"></span>
+      </div>
+
+      <form id="novaSenhaForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" class="form-input" readonly>
+        </div>
+        <div class="form-group">
+          <label for="codigo">Código de recuperação</label>
+          <input type="text" id="codigo" class="form-input" placeholder="Digite o código de 6 dígitos" maxlength="6" required>
+        </div>
+        <div class="form-group">
+          <label for="nova_senha">Nova senha</label>
+          <div style="position: relative;">
+            <input type="password" id="nova_senha" class="form-input" placeholder="Mínimo de 6 caracteres" minlength="6" required style="padding-right: 40px;">
+            <button type="button" onclick="togglePassword('nova_senha', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="confirmar_senha">Confirmar nova senha</label>
+          <div style="position: relative;">
+            <input type="password" id="confirmar_senha" class="form-input" placeholder="Repita a senha" minlength="6" required style="padding-right: 40px;">
+            <button type="button" onclick="togglePassword('confirmar_senha', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="btnRedefinir">
+          <i class="fa-solid fa-key"></i> Redefinir Senha
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <a href="login.html">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao login
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/nova-senha.js"></script>
+</body>
+</html>

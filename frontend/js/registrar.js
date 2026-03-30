@@ -36,12 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      setToken(data.token);
-      if (data.refreshToken) {
-        setRefreshToken(data.refreshToken);
-      }
-      localStorage.setItem('usuario', JSON.stringify(data.usuario));
-      window.location.href = 'app.html';
+      window.location.href = 'confirmar-email.html?email=' + encodeURIComponent(email);
     } catch (err) {
       errText.textContent = 'Servidor indisponível ou erro de rede.';
       errMsg.style.display = 'flex';

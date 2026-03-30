@@ -6,6 +6,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
   if (!loginForm) return;
 
+  // Check for reset success message
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('reset') === 'success') {
+    const successBox = document.getElementById('authSuccess');
+    const successText = document.getElementById('authSuccessText');
+    if (successBox && successText) {
+      successText.textContent = 'Senha redefinida com sucesso! Faça login.';
+      successBox.style.display = 'flex';
+    }
+    // Clean URL without reload
+    const url = new URL(window.location);
+    url.searchParams.delete('reset');
+    window.history.replaceState({}, document.title, url);
+  }
+
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('btnLogin');

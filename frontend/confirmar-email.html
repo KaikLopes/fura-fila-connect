@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | FuraFila Connect</title>
+  <title>Confirmar Email | FuraFila Connect</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,10 +18,10 @@
       <div class="auth-brand">
         <i class="fa-solid fa-staff-snake"></i>
         <h1>FuraFila<span> Connect</span></h1>
-        <p>Acesse sua conta para gerenciar a clínica</p>
+        <p>Enviamos um código de confirmação para seu email</p>
       </div>
 
-      <div class="auth-error" id="authError">
+      <div class="auth-error" id="authError" style="display: none;">
         <i class="fa-solid fa-circle-exclamation"></i>
         <span id="authErrorText"></span>
       </div>
@@ -31,36 +31,33 @@
         <span id="authSuccessText"></span>
       </div>
 
-      <form id="loginForm">
+      <form id="confirmForm">
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" class="form-input" placeholder="seu@email.com" required>
+          <input type="email" id="email" class="form-input" readonly>
         </div>
         <div class="form-group">
-          <label for="senha">Senha</label>
-          <div style="position: relative;">
-            <input type="password" id="senha" class="form-input" placeholder="••••••••" required style="padding-right: 40px;">
-            <button type="button" onclick="togglePassword('senha', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; padding: 4px;">
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
+          <label for="codigo">Código de confirmação</label>
+          <input type="text" id="codigo" class="form-input" placeholder="Digite o código de 6 dígitos" maxlength="6" required>
         </div>
-        <button type="submit" class="btn btn-primary btn-block" id="btnLogin" style="margin-top: 8px;">
-          <i class="fa-solid fa-right-to-bracket"></i> Entrar
+        <button type="submit" class="btn btn-primary btn-block" id="btnConfirmar">
+          <i class="fa-solid fa-check"></i> Confirmar Email
         </button>
       </form>
 
       <div class="auth-footer">
-        <a href="esqueci-senha.html" class="forgot-password">
-          <i class="fa-solid fa-key"></i> Esqueci minha senha
-        </a>
+        <button type="button" class="btn-link" id="btnReenviar">
+          <i class="fa-solid fa-paper-plane"></i> Não recebeu? Reenviar código
+        </button>
         <br><br>
-        Não tem uma conta? <a href="registrar.html">Cadastre-se</a>
+        <a href="login.html">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao login
+        </a>
       </div>
     </div>
   </div>
 
   <script src="js/auth.js"></script>
-  <script src="js/login.js"></script>
+  <script src="js/confirmar-email.js"></script>
 </body>
 </html>
