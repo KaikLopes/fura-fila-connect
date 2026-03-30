@@ -49,7 +49,7 @@ registerPage('dashboard', async function () {
         </div>
       `).join('');
     } else {
-      rkContainer.innerHTML = '<div class="empty-state" style="padding:10px;"><p style="font-size:0.8rem">Dados de ranking indisponíveis.<br><span style="font-size:0.65rem;color:var(--text-light)">Servidor precisa ser atualizado.</span></p></div>';
+      rkContainer.innerHTML = '<div class="empty-state" style="padding:10px;text-align:center;"><i class="fa-solid fa-chart-simple" style="font-size:1.2rem;color:var(--text-muted);"></i><p style="font-size:0.8rem;margin-top:8px;">Nenhum dado de ranking ainda.</p><p style="font-size:0.65rem;color:var(--text-muted);margin-top:4px;">Serviços mais agendados aparecerão aqui.</p></div>';
     }
   }
 
