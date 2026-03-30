@@ -51,7 +51,6 @@ async function tryRefreshToken() {
       return true;
     }
   } catch (err) {}
-  }
   return false;
 }
 
