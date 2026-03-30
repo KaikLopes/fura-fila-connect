@@ -19,7 +19,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 .obsidian/
-.claude
+.claude/
 
 # MCP configuration (contains credentials)
 .mcp.json
