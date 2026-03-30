@@ -5,6 +5,8 @@ const pool = require('../db/pool');
 const autenticar = require('../middleware/auth');
 const rateLimit = require('express-rate-limit');
 const { createTokenPair, refreshAccessToken, revokeRefreshToken, revokeAllUserTokens } = require('../utils/tokens');
+const { enviarEmail, gerarCorpoEmailConfirmacao, gerarCorpoEmailReset } = require('../utils/email');
+const { gerarCodigo, salvarCodigo, validarCodigo, marcarCodigoUsado } = require('../utils/codigos');
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
@@ -49,7 +51,7 @@ router.post('/registrar', authLimiter, async (req, res) => {
     const senha_hash = await bcrypt.hash(senha, 10);
 
     const result = await pool.query(
-      'INSERT INTO usuarios (clinica_nome, nome, email, cnpj, senha_hash) VALUES ($1, $2, $3, $4, $5) RETURNING id, clinica_nome, email, cnpj',
+      'INSERT INTO usuarios (clinica_nome, nome, email, cnpj, senha_hash, email_confirmado) VALUES ($1, $2, $3, $4, $5, false) RETURNING id, clinica_nome, email, cnpj',
       [clinica_nome, clinica_nome, email, cnpj || '', senha_hash]
     );
 
@@ -61,17 +63,19 @@ router.post('/registrar', authLimiter, async (req, res) => {
       [novoUsuario.id, clinica_nome || '']
     );
 
-    // Gerar par de tokens
-    const tokens = await createTokenPair(novoUsuario.id, novoUsuario.email);
+    // Gerar código de confirmação e enviar email
+    const codigo = gerarCodigo();
+    await salvarCodigo(novoUsuario.id, codigo, 'confirmacao');
 
-    // Definir refresh token como cookie httpOnly
-    setRefreshTokenCookie(res, tokens.refreshToken, tokens.expiresAt);
+    enviarEmail({
+      para: email,
+      assunto: 'Confirme seu email - FuraFila Connect',
+      html: gerarCorpoEmailConfirmacao(codigo),
+    }).catch(err => console.error('Erro ao enviar email de confirmação:', err.message));
 
     res.status(201).json({
       sucesso: true,
-      token: tokens.accessToken,
-      expiresAt: tokens.expiresAt,
-      usuario: novoUsuario
+      mensagem: 'Cadastro realizado. Verifique seu email para confirmar a conta.',
     });
   } catch (err) {
     console.error('Erro ao registrar:', err.message);
@@ -89,7 +93,7 @@ router.post('/login', authLimiter, async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT id, clinica_nome, email, cnpj, senha_hash FROM usuarios WHERE email = $1',
+      'SELECT id, clinica_nome, email, cnpj, senha_hash, email_confirmado FROM usuarios WHERE email = $1',
       [email]
     );
 
@@ -98,6 +102,12 @@ router.post('/login', authLimiter, async (req, res) => {
     }
 
     const usuario = result.rows[0];
+
+    // Verificar se email foi confirmado
+    if (!usuario.email_confirmado) {
+      return res.status(403).json({ erro: 'Email ainda não confirmado. Verifique sua caixa de entrada.' });
+    }
+
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
 
     if (!senhaValida) {
@@ -255,6 +265,122 @@ router.post('/logout', async (req, res) => {
   } catch (err) {
     console.error('Erro ao logout:', err.message);
     res.status(500).json({ erro: 'Falha ao fazer logout.' });
+  }
+});
+
+// ─── POST /api/auth/enviar-codigo ───────────────────────────────────
+// Envia código de confirmação ou reset de senha
+router.post('/enviar-codigo', authLimiter, async (req, res) => {
+  try {
+    const { email, tipo } = req.body;
+
+    if (!email || !tipo || !['confirmacao', 'reset'].includes(tipo)) {
+      return res.status(400).json({ erro: 'Email e tipo são obrigatórios.' });
+    }
+
+    const result = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
+
+    // Não revelar se email existe
+    if (result.rows.length === 0) {
+      return res.json({ sucesso: true, mensagem: 'Se o email existir, um código foi enviado.' });
+    }
+
+    const usuarioId = result.rows[0].id;
+    const codigo = gerarCodigo();
+    await salvarCodigo(usuarioId, codigo, tipo);
+
+    const html = tipo === 'confirmacao'
+      ? gerarCorpoEmailConfirmacao(codigo)
+      : gerarCorpoEmailReset(codigo);
+    const assunto = tipo === 'confirmacao'
+      ? 'Confirme seu email - FuraFila Connect'
+      : 'Recuperação de senha - FuraFila Connect';
+
+    enviarEmail({ para: email, assunto, html }).catch(err => console.error('Erro ao enviar email:', err.message));
+
+    res.json({ sucesso: true, mensagem: 'Código enviado para o email.' });
+  } catch (err) {
+    console.error('Erro enviar-codigo:', err.message);
+    res.status(500).json({ erro: 'Falha ao processar solicitação.' });
+  }
+});
+
+// ─── POST /api/auth/verificar-codigo ────────────────────────────────
+// Verifica código de confirmação ou reset
+router.post('/verificar-codigo', authLimiter, async (req, res) => {
+  try {
+    const { email, codigo, tipo } = req.body;
+
+    if (!email || !codigo || !tipo) {
+      return res.status(400).json({ erro: 'Email, código e tipo são obrigatórios.' });
+    }
+
+    const usuarioId = await validarCodigo(email, codigo, tipo);
+    if (!usuarioId) {
+      return res.status(400).json({ erro: 'Código inválido ou expirado.' });
+    }
+
+    if (tipo === 'confirmacao') {
+      // Marcar email como confirmado e fazer login automático
+      await pool.query('UPDATE usuarios SET email_confirmado = true WHERE id = $1', [usuarioId]);
+      await marcarCodigoUsado(usuarioId, 'confirmacao');
+
+      const tokens = await createTokenPair(usuarioId, email);
+      setRefreshTokenCookie(res, tokens.refreshToken, tokens.expiresAt);
+
+      const userResult = await pool.query(
+        'SELECT id, clinica_nome, email, cnpj FROM usuarios WHERE id = $1',
+        [usuarioId]
+      );
+
+      res.json({
+        sucesso: true,
+        token: tokens.accessToken,
+        expiresAt: tokens.expiresAt,
+        usuario: userResult.rows[0],
+      });
+    } else {
+      // Para reset, marcar código como pendente de uso
+      await pool.query(
+        'UPDATE password_reset_tokens SET usado_em = NOW() WHERE usuario_id = $1 AND codigo = $2',
+        [usuarioId, codigo]
+      );
+      res.json({ sucesso: true, pendente: true, mensagem: 'Código verificado. Defina sua nova senha.' });
+    }
+  } catch (err) {
+    console.error('Erro verificar-codigo:', err.message);
+    res.status(500).json({ erro: 'Falha ao verificar código.' });
+  }
+});
+
+// ─── POST /api/auth/resetar-senha ───────────────────────────────────
+// Redefine senha com código de recuperação
+router.post('/resetar-senha', authLimiter, async (req, res) => {
+  try {
+    const { email, codigo, nova_senha } = req.body;
+
+    if (!email || !codigo || !nova_senha) {
+      return res.status(400).json({ erro: 'Email, código e nova senha são obrigatórios.' });
+    }
+
+    if (nova_senha.length < 6) {
+      return res.status(400).json({ erro: 'A senha deve ter no mínimo 6 caracteres.' });
+    }
+
+    const usuarioId = await validarCodigo(email, codigo, 'reset');
+    if (!usuarioId) {
+      return res.status(400).json({ erro: 'Código inválido ou expirado.' });
+    }
+
+    const senha_hash = await bcrypt.hash(nova_senha, 10);
+    await pool.query('UPDATE usuarios SET senha_hash = $1 WHERE id = $2', [senha_hash, usuarioId]);
+    await marcarCodigoUsado(usuarioId, 'reset');
+    await revokeAllUserTokens(usuarioId);
+
+    res.json({ sucesso: true, mensagem: 'Senha alterada com sucesso. Faça login.' });
+  } catch (err) {
+    console.error('Erro resetar-senha:', err.message);
+    res.status(500).json({ erro: 'Falha ao redefinir senha.' });
   }
 });
 
