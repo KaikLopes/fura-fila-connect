@@ -79,17 +79,7 @@ registerPage('agenda', async function () {
   buildWeekPicker();
 
   // ═══════════ TONS ═══════════
-  const tonsData = await apiFetch('/agenda/tons');
   const tacticSelect = document.getElementById('waAiTactic');
-  if (tonsData && tonsData.tons) {
-    tacticSelect.innerHTML = '';
-    tonsData.tons.forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t;
-      opt.textContent = t.charAt(0).toUpperCase() + t.slice(1);
-      tacticSelect.appendChild(opt);
-    });
-  }
 
   // ═══════════ LOAD AGENDA ═══════════
   async function loadAgenda() {
@@ -507,27 +497,63 @@ registerPage('agenda', async function () {
   }
 
   // ═══════════ WHATSAPP MODAL ═══════════
+  const templatesMensagem = {
+    calmo: (nome, horario) => `Olá, ${nome}! Tudo bem? 😊\n\nSurgiu uma vaga inesperada aqui na clínica hoje para às ${horario}. Como você está na nossa fila de espera, gostaríamos de saber se gostaria de antecipar seu atendimento. Sem pressa, nos avise se conseguir vir!`,
+    
+    urgente: (nome, horario) => `⚠️ AVISO PRIORITÁRIO: ${nome}, abrimos um horário de última hora para às ${horario}.\n\nA demanda está alta hoje, então precisamos da sua confirmação nos próximos 15 minutos para garantir sua vaga. Podemos confirmar sua vinda?`,
+    
+    persuasivo: (nome, horario) => `Olá, ${nome}! Boas notícias! 🎉\n\nConseguimos uma brecha para te atender hoje às ${horario}. É uma ótima oportunidade para você adiantar seu tratamento e já resolver isso hoje mesmo, sem precisar esperar. Vamos confirmar?`
+  };
+
   function openWaModal(recup, slotId, cancelado) {
     currentSlotId = slotId;
-    currentRecup = { nome: recup.nome, horario: cancelado.horario, servico: cancelado.servico };
+    currentRecup = { 
+        nome: recup.nome, 
+        horario: cancelado.horario, 
+        telefone: recup.telefone || '' // Pegando o número real do banco
+    };
 
     document.getElementById('waName').textContent = recup.nome;
-    document.getElementById('waMessageText').value = recup.mensagem_texto;
+    
+    // Define a mensagem inicial como 'Calmo' por padrão
+    document.getElementById('waMessageText').value = templatesMensagem.calmo(recup.nome, cancelado.horario);
+    document.getElementById('waAiTactic').value = 'calmo';
 
-    if (recup.whatsapp_url && recup.whatsapp_url.includes('wa.me/?text=')) {
-      showToast('Atenção: Seu número de WhatsApp não está configurado em Configurações > Clínica.', 'error');
-    }
-
-    if (tacticSelect.querySelector(`option[value="${recup.tipo_variacao}"]`)) {
-      tacticSelect.value = recup.tipo_variacao;
-    }
-
+    // ==== A MÁGICA DA PROTEÇÃO ESTÁ NESTE BLOCO ====
     const matchEl = document.getElementById('waIntelligenceMatch');
-    if (recup.score && recup.score.motivo) {
-      matchEl.classList.remove('hidden');
-      document.getElementById('waMatchReason').textContent = `Match IA: ${recup.score.motivo}`;
-      document.getElementById('waAddress').textContent = recup.endereco || 'Não informado';
-    } else { matchEl.classList.add('hidden'); }
+    if (matchEl) { // <- Essa linha blinda o seu código!
+      if (recup.score && recup.score.motivo) {
+        matchEl.classList.remove('hidden');
+        
+        const reasonEl = document.getElementById('waMatchReason');
+        if (reasonEl) reasonEl.textContent = `Match IA: ${recup.score.motivo}`;
+        
+        const addressEl = document.getElementById('waAddress');
+        if (addressEl) addressEl.textContent = recup.endereco || 'Não informado';
+      } else { 
+        matchEl.classList.add('hidden'); 
+      }
+    }
+    // ===============================================
+
+    // Formata o número (remove caracteres não numéricos)
+    const telLimpo = currentRecup.telefone ? currentRecup.telefone.replace(/\D/g, '') : '';
+    
+    // Atualiza o botão de envio para usar o WhatsApp do Paciente
+    const sendBtn = document.getElementById('waSendBtn');
+    
+    // Sobrescreve o onclick para garantir que sempre pega o numero/msg corretos.
+    sendBtn.onclick = async () => {
+        const msgFinal = encodeURIComponent(document.getElementById('waMessageText').value);
+        window.open(`https://wa.me/55${telLimpo}?text=${msgFinal}`, '_blank');
+        closeWaModal();
+        if (currentSlotId) {
+          await apiFetch('/agenda/confirmar', { method: 'POST', body: JSON.stringify({ id: currentSlotId }) });
+          const row = document.querySelector(`tr[data-slot-id="${currentSlotId}"]`);
+          if (row) { row.querySelector('td:last-child').innerHTML = '<span class="badge badge-warning">Aguardando Cliente</span>'; }
+          showToast('Mensagem enviada! Status salvo.');
+        }
+    };
 
     const now = new Date();
     document.getElementById('waTime').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -540,26 +566,11 @@ registerPage('agenda', async function () {
   document.getElementById('waCancelBtn').addEventListener('click', closeWaModal);
   document.getElementById('waModal').addEventListener('click', e => { if (e.target.id === 'waModal') closeWaModal(); });
 
-  tacticSelect.addEventListener('change', async (e) => {
+  tacticSelect.addEventListener('change', (e) => {
     if (!currentRecup) return;
-    const textarea = document.getElementById('waMessageText');
-    textarea.style.opacity = '0.5';
-    const params = new URLSearchParams({ nome: currentRecup.nome, horario: currentRecup.horario, servico: currentRecup.servico, tom: e.target.value });
-    const data = await apiFetch(`/agenda/regenerar?${params}`);
-    if (data) textarea.value = data.mensagem_texto;
-    textarea.style.opacity = '1';
-  });
-
-  document.getElementById('waSendBtn').addEventListener('click', async () => {
-    const msg = document.getElementById('waMessageText').value;
-    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
-    closeWaModal();
-    if (currentSlotId) {
-      await apiFetch('/agenda/confirmar', { method: 'POST', body: JSON.stringify({ id: currentSlotId }) });
-      const row = document.querySelector(`tr[data-slot-id="${currentSlotId}"]`);
-      if (row) { row.querySelector('td:last-child').innerHTML = '<span class="badge badge-warning">Aguardando Cliente</span>'; }
-      showToast('Mensagem enviada! Status salvo.');
-    }
+    const tom = e.target.value;
+    const msg = templatesMensagem[tom](currentRecup.nome, currentRecup.horario);
+    document.getElementById('waMessageText').value = msg;
   });
 
   // ═══════════ SLOT CREATION MODAL ═══════════

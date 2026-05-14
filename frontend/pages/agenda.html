@@ -189,9 +189,14 @@
           <div class="wa-message-meta"><span id="waTime">00:00</span> <i class="fa-solid fa-check-double" style="color:#53bdeb;"></i></div>
         </div>
       </div>
-        <div class="ai-insight" style="display:none;">
-          <i class="fa-solid fa-brain"></i> <span>Tática:</span>
-          <select id="waAiTactic" class="wa-select-tactic"></select>
+        <div class="ai-insight" id="aiTacticContainer" style="display: block; margin-top: 15px; border: 1px solid var(--primary); padding: 10px; border-radius: 8px;">
+          <i class="fa-solid fa-brain" style="color: var(--primary);"></i> 
+          <span style="font-weight: 600; font-size: 0.85rem;">Tática de Recuperação:</span>
+          <select id="waAiTactic" class="wa-select-tactic" style="background: transparent; color: white; border: none; font-size: 0.85rem; cursor: pointer;">
+            <option value="calmo">😇 Tom Calmo (Sugestão)</option>
+            <option value="urgente">⚡ Tom Urgente (Escassez)</option>
+            <option value="persuasivo">🎯 Tom Persuasivo (Benefício)</option>
+          </select>
         </div>
     </div>
 
