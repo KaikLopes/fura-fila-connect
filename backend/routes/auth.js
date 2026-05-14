@@ -72,30 +72,55 @@ router.post('/registrar', authLimiter, async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', authLimiter, async (req, res) => {
+router.post('/login', async (req, res) => {
+  const { email, senha } = req.body;
+
   try {
-    const { email, senha } = req.body;
-    if (!email || !senha) return res.status(400).json({ erro: 'Email e senha obrigatórios.' });
-
+    // 1. Busca o usuário no banco de dados
     const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-    if (result.rows.length === 0) return res.status(401).json({ erro: 'Email ou senha incorretos.' });
-
     const usuario = result.rows[0];
-    if (!usuario.email_confirmado) return res.status(403).json({ erro: 'Email não confirmado.' });
 
+    // 2. TRAVA 1: Se o email não existir no banco, barra aqui (Evita o Erro 500)
+    if (!usuario) {
+      return res.status(401).json({ sucesso: false, erro: 'Usuário não encontrado. Verifique o email.' });
+    }
+
+    // 3. TRAVA 2: Compara a senha digitada com o Hash do banco (Usa a coluna certa: senha_hash)
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
-    if (!senhaValida) return res.status(401).json({ erro: 'Email ou senha incorretos.' });
 
-    const tokens = await createTokenPair(usuario.id, usuario.email);
-    setRefreshTokenCookie(res, tokens.refreshToken, tokens.expiresAt);
+    if (!senhaValida) {
+      return res.status(401).json({ sucesso: false, erro: 'Senha incorreta.' });
+    }
 
+    // 4. Gera o Token Principal (JWT)
+    const token = jwt.sign(
+      { id: usuario.id, email: usuario.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+
+    // 5. Gera o Refresh Token (O seu frontend já pede e trata isso no login.js)
+    const refreshToken = jwt.sign(
+      { id: usuario.id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // 6. Segurança: Remove o hash da senha antes de enviar os dados do usuário para o navegador
+    delete usuario.senha_hash;
+
+    // 7. Retorna o sucesso e os dados para o frontend liberar o acesso
     res.json({
       sucesso: true,
-      token: tokens.accessToken,
-      usuario: { id: usuario.id, clinica_nome: usuario.clinica_nome, email: usuario.email }
+      token,
+      refreshToken,
+      usuario
     });
-  } catch (err) {
-    res.status(500).json({ erro: 'Falha ao fazer login.' });
+
+  } catch (error) {
+    // 8. O ALARME: Se der qualquer erro no servidor/banco, vai gritar no terminal do Render
+    console.error('❌ ERRO FATAL NO LOGIN:', error);
+    res.status(500).json({ sucesso: false, erro: 'Erro interno no servidor. Verifique os logs.' });
   }
 });
 

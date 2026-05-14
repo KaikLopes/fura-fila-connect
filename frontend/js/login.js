@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include', // Necessário para cookies em produção
           body: JSON.stringify({
-            email: 'recrutador@furafila.com',
-            senha: 'portfolio2026'
+            email: 'recrutador@kaiklopesdev.com.br',
+            senha: '123456'
           }),
         });
 
