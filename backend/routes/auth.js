@@ -19,10 +19,14 @@ const router = express.Router();
 // Helper para definir cookie com atributos de segurança
 function setRefreshTokenCookie(res, token, expiresAt) {
   const expires = new Date(expiresAt);
+  
+  // Deteta se está na nuvem ou no computador local
+  const isProduction = process.env.NODE_ENV === 'production';
+
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProduction, // Tem de ser true na nuvem (HTTPS)
+    sameSite: isProduction ? 'none' : 'strict', // 'none' permite domínios diferentes
     path: '/',
     expires: expires
   });

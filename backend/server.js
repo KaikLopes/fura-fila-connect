@@ -1,7 +1,6 @@
-const helmet = require('helmet');
-app.use(helmet());
 require('dotenv').config();
 const express = require('express');
+const helmet = require('helmet');
 const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
@@ -22,6 +21,7 @@ const PORT = process.env.PORT || 3000;
 
 // ── Middleware Global ────────────────────────────────────────────────
 app.set('trust proxy', 1);
+app.use(helmet());
 app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (mobile apps, curl, Postman)
