@@ -1,4 +1,4 @@
-const API_BASE = 'https://furafila-api.onrender.com'; // Use a sua URL do Render aqui
+const API_BASE = 'https://furafila-api.onrender.com/api'; // Use a sua URL do Render aqui
 
 function getToken() { return localStorage.getItem('token'); }
 function setToken(t) { localStorage.setItem('token', t); }
