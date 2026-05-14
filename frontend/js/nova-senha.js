@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const email = params.get('email');
 
   if (!email) {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
     return;
   }
 
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
       successBox.style.display = 'flex';
 
       setTimeout(() => {
-        window.location.href = 'login.html?reset=success';
+        window.location.href = 'index.html?reset=success';
       }, 2000);
     } catch (err) {
       errText.textContent = 'Servidor indisponível. Tente novamente.';

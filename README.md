@@ -182,7 +182,7 @@ fura-fila-connect/
 │   ├── app.html            # SPA principal
 │   ├── confirmar-email.html
 │   ├── esqueci-senha.html
-│   ├── login.html
+│   ├── index.html
 │   ├── nova-senha.html
 │   └── registrar.html
 ├── .gitignore

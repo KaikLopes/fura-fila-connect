@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const email = params.get('email');
 
   if (!email) {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
     return;
   }
 

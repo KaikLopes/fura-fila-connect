@@ -19,12 +19,12 @@ function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('usuario');
-  window.location.href = 'login.html';
+  window.location.href = 'index.html';
 }
 
 function requireAuth() {
   if (!getToken()) {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
     return false;
   }
   return true;

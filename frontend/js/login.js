@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       btnRecrutador.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
 
       try {
-        const res = await fetch(API_BASE + '/auth/login', {
+        const res = await fetch(API_BASE + '/auth/index', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include', // Necessário para cookies em produção
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     errBox.style.display = 'none';
 
     try {
-      const res = await fetch(API_BASE + '/auth/login', {
+      const res = await fetch(API_BASE + '/auth/index', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
