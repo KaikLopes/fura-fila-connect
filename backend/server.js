@@ -1,3 +1,5 @@
+const helmet = require('helmet');
+app.use(helmet());
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -19,6 +21,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Middleware Global ────────────────────────────────────────────────
+app.set('trust proxy', 1);
 app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (mobile apps, curl, Postman)
@@ -30,6 +33,7 @@ app.use(cors({
       'http://127.0.0.1:3000',
       'http://localhost:3001',
       'http://127.0.0.1:3001',
+      process.env.FRONTEND_URL
     ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);

@@ -19,4 +19,8 @@ pool.on('connect', () => {
   console.log('✅ Nova conexão adicionada ao pool');
 });
 
+pool.on('connect', (client) => {
+  client.query("SET TIME ZONE 'America/Sao_Paulo'");
+});
+
 module.exports = pool;
