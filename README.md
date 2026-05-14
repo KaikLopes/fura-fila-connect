@@ -1,47 +1,53 @@
-# FuraFila Connect
+# 🏥 FuraFila Connect
 
-> Sistema de agendamento para clínicas e consultórios — gerencie profissionais, clientes e horários de forma inteligente.
+Sistema SaaS para clínicas com Recuperação Inteligente de Agendamentos. Converte horários vagos em lucro automatizando o contato com a fila de espera via WhatsApp.
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-blue)
-![Node.js](https://img.shields.io/badge/Node.js-18+-green)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue)
-![License](https://img.shields.io/badge/license-MIT-yellow)
+🔗 [Acessar o Projeto Online](#) | 💼 [Meu Portfólio](https://github.com/KaikLopes)
 
-## Funcionalidades
+## 🌟 O Diferencial: Taxa de Recuperação Inteligente
+
+O grande diferencial deste sistema não é apenas agendar, mas evitar prejuízos. Quando um paciente cancela um horário de última hora, o sistema:
+
+1. **Identifica automaticamente** o próximo paciente elegível na fila de espera diária.
+2. **Gera uma notificação** na tela com os dados do paciente.
+3. **Disponibiliza táticas de Copywriting (IA)** — Tons Calmo, Urgente (Escassez) ou Persuasivo (Benefício).
+4. **Abre o WhatsApp Web** já com a mensagem persuasiva formatada e o número correto do paciente, pronto para envio.
+
+## 🚀 Funcionalidades
+
+### Gestão e Operação
+- **Agenda Inteligente** — Cruzamento de dias de funcionamento da clínica com os dias de atendimento dos profissionais para gerar horários dinâmicos.
+- **Fila de Espera Diária** — Gerenciamento efêmero e automático da fila do dia.
+- **Profissionais e Clientes** — CRUD completo com histórico e vinculação.
+- **Dashboard Analítico** — Métricas em tempo real de ocupação, faturamento do dia e taxa de recuperação.
 
 ### Autenticação e Segurança
-- **Registro com confirmação de email** — códigos de 6 dígitos com expiração de 30 minutos
-- **Recuperação de senha** — fluxo seguro via email
-- **JWT com refresh tokens** — sessões seguras com rotação de tokens
-- **Rate limiting** — proteção contra ataques de força bruta
+- **Login Otimizado e Seguro** — Validação rigorosa de hash e JWT.
+- **Registro com confirmação de email** — Códigos OTP de 6 dígitos com expiração.
+- **Recuperação de senha** — Fluxo seguro via email com tokens temporários.
+- **Sessões Seguras** — JWT com refresh tokens e rotação.
+- **Rate limiting** — Proteção contra ataques de força bruta.
 
-### Gestão
-- **Profissionais** — CRUD completo de prestadores de serviço
-- **Clientes** — cadastro e histórico de atendimento
-- **Agenda Inteligente** — horários disponíveis, agendamento, cancelamento e confirmação
-- **Fila de Espera** — gerenciamento automático de espera
-
-### Dashboard
-- Métricas em tempo real (consultas do dia, confirmações, pendências)
-- Ranking de serviços mais agendados
-- Taxa de recuperação de vagas
-- Próximo horário disponível
-
-## Stack Tecnológica
+## 🛠️ Stack Tecnológica
 
 | Camada | Tecnologias |
-|--------|-------------|
-| **Backend** | Node.js · Express.js · PostgreSQL · JWT · bcrypt |
-| **Frontend** | HTML5 · CSS3 · JavaScript (Vanilla) |
-| **Email** | Nodemailer · Ethereal (desenvolvimento) |
-| **Banco** | PostgreSQL com pool de conexões otimizado |
+| :--- | :--- |
+| **Frontend** | HTML5 · CSS3 · JavaScript (Vanilla ES6+) · Hospedado na Vercel |
+| **Backend** | [Node.js](https://nodejs.org/) · [Express.js](https://expressjs.com/) · JWT · bcrypt · Hospedado no Render |
+| **Banco de Dados** | [Supabase](https://supabase.com/) ([PostgreSQL](https://www.postgresql.org/)) com Connection Pooler (IPv4/IPv6) |
+| **Email** | [Nodemailer](https://nodemailer.com/) · Ethereal (desenvolvimento) / SMTP de Produção |
 
-## Getting Started
+## 🧠 Desafios Técnicos Superados
+
+- **Timezones e Consultas de Datas:** Correção de divergências de fuso horário (GMT-3) no JavaScript Vanilla para garantir que as requisições SQL ao banco de dados sempre filtrassem o dia correto (ISO 8601).
+- **Bloqueio IPv6 em Cloud:** Solução do erro `ENETUNREACH` entre o Render e o Supabase através da implementação de um Connection Pooler na porta 6543, garantindo tráfego IPv4 estável e 100% de uptime.
+- **Resiliência de DOM:** Blindagem do frontend contra null references durante o carregamento assíncrono de componentes dinâmicos.
+
+## ⚙️ Getting Started
 
 ### Pré-requisitos
-
 - [Node.js](https://nodejs.org/) 18+
-- [PostgreSQL](https://www.postgresql.org/) 14+
+- [PostgreSQL](https://www.postgresql.org/) 14+ (ou projeto [Supabase](https://supabase.com/))
 - Git
 
 ### Instalação
@@ -55,35 +61,33 @@ cd fura-fila-connect
 cd backend
 npm install
 
-# Criar banco de dados no PostgreSQL
-createdb furafila
-
 # Configurar variáveis de ambiente
 cp .env.example .env
-# Edite o .env com suas credenciais
+# Edite o .env com suas credenciais do banco
 
-# Executar migrações
+# Executar migrações (se aplicável ao seu script)
 npm run migrate
 
 # Iniciar servidor
 npm start
 ```
 
-### Configuração
+### Configuração `.env`
 
 Crie o arquivo `backend/.env`:
 
 ```env
-# Banco de dados
+# Banco de dados (Use a connection string do pooler caso use Supabase)
 DATABASE_URL=postgresql://usuario:senha@localhost:5432/furafila
 
 # Autenticação JWT
 JWT_SECRET=sua_chave_secreta_super_segura
+REFRESH_SECRET=sua_chave_refresh_secreta
 
 # Servidor
 PORT=3000
 
-# SMTP (opcional - emails simulados no console se não configurado)
+# SMTP
 SMTP_HOST=smtp.seuprovedor.com
 SMTP_PORT=587
 SMTP_USER=seu@email.com
@@ -91,146 +95,61 @@ SMTP_PASS=sua_senha
 SMTP_FROM="FuraFila Connect" <noreply@seuservico.com>
 ```
 
-### Acesso
-
-Após iniciar o servidor:
-
-- **Frontend**: `http://localhost:3000`
-- **API**: `http://localhost:3000/api`
-- **Health Check**: `http://localhost:3000/api/health`
-
-## API Endpoints
+## 📡 API Endpoints
 
 ### Autenticação (públicas)
 
 | Método | Endpoint | Descrição |
-|--------|----------|-----------|
+| :--- | :--- | :--- |
 | `POST` | `/api/auth/registrar` | Cadastro de nova clínica |
 | `POST` | `/api/auth/login` | Login com email e senha |
-| `POST` | `/api/auth/enviar-codigo` | Envia código (confirmação ou reset) |
+| `POST` | `/api/auth/enviar-codigo` | Envia código OTP (confirmação/reset) |
 | `POST` | `/api/auth/verificar-codigo` | Verifica código de confirmação |
 | `POST` | `/api/auth/resetar-senha` | Redefine senha com código |
 | `POST` | `/api/auth/refresh` | Renova access token |
 | `POST` | `/api/auth/logout` | Revoga refresh token |
 
-### Agenda (protegidas)
+### Agenda & Dashboards (protegidas)
 
 | Método | Endpoint | Descrição |
-|--------|----------|-----------|
+| :--- | :--- | :--- |
 | `GET` | `/api/agenda` | Lista horários do dia |
-| `GET` | `/api/agenda/status` | Estatísticas do dia |
-| `POST` | `/api/agenda/cancelar` | Cancela agendamento |
-| `POST` | `/api/agenda/confirmar` | Confirma agendamento |
-| `GET` | `/api/agenda/regenerar` | Regenera horários do dia |
-| `GET` | `/api/agenda/tons` | Lista tons de horário |
+| `GET` | `/api/agenda/status` | Estatísticas de agendamento do dia |
+| `POST` | `/api/agenda/cancelar` | Cancela agendamento e aciona fila |
+| `POST` | `/api/agenda/confirmar` | Confirma agendamento existente |
+| `GET` | `/api/dashboard` | Métricas globais, faturamento e resumo |
+| `GET` | `/api/clientes/fila` | Retorna a fila de espera atualizada |
 
-### Outros (protegidos)
+## 📂 Estrutura do Projeto
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `GET` | `/api/auth/me` | Perfil do usuário logado |
-| `PUT` | `/api/auth/perfil` | Atualiza perfil |
-| `PUT` | `/api/auth/senha` | Altera senha |
-| `GET/POST` | `/api/profissionais` | CRUD de profissionais |
-| `GET/POST` | `/api/clientes` | CRUD de clientes |
-| `GET` | `/api/clientes/fila` | Fila de espera |
-| `GET` | `/api/dashboard` | Métricas e resumo |
-| `GET/PUT` | `/api/configuracoes` | Configurações da clínica |
-
-## Estrutura do Projeto
-
-```
+```text
 fura-fila-connect/
 ├── backend/
-│   ├── db/
-│   │   ├── migrate.js      # Script de migração do banco
-│   │   └── pool.js         # Configuração do pool PostgreSQL
-│   ├── middleware/
-│   │   └── auth.js         # Middleware JWT de autenticação
-│   ├── routes/
-│   │   ├── agenda.js       # Rotas da agenda
-│   │   ├── auth.js         # Rotas de autenticação
-│   │   ├── clientes.js     # Rotas de clientes
-│   │   ├── configuracoes.js
-│   │   ├── dashboard.js    # Rotas do dashboard
-│   │   └── profissionais.js
-│   ├── utils/
-│   │   ├── codigos.js      # Gerador de códigos OTP
-│   │   ├── email.js        # Serviço de email
-│   │   └── tokens.js       # Utilitários JWT
-│   ├── .env                # Variáveis de ambiente (não commitar)
-│   ├── package.json
-│   └── server.js            # Entry point
+│   ├── db/              # Scripts de migração e pool de conexão PG
+│   ├── middleware/      # Middlewares (Auth JWT)
+│   ├── routes/          # Controladores de rotas da API
+│   ├── utils/           # Helpers (Senhas, OTP, Email)
+│   ├── .env             # Variáveis de ambiente
+│   └── server.js        # Entry point da API
 ├── frontend/
-│   ├── css/
-│   │   ├── components.css  # Componentes reutilizáveis
-│   │   ├── global.css      # Estilos globais e variáveis
-│   │   └── pages.css       # Estilos específicos de páginas
-│   ├── js/
-│   │   ├── agenda.js       # Lógica da agenda
-│   │   ├── app.js          # Router e navegação
-│   │   ├── auth.js         # Utilitários de autenticação
-│   │   ├── clientes.js     # Gerenciamento de clientes
-│   │   ├── confirmar-email.js
-│   │   ├── configuracoes.js
-│   │   ├── dashboard.js    # Lógica do dashboard
-│   │   ├── esqueci-senha.js
-│   │   ├── login.js
-│   │   ├── nova-senha.js
-│   │   ├── profissionais.js
-│   │   └── registrar.js
-│   ├── app.html            # SPA principal
-│   ├── confirmar-email.html
-│   ├── esqueci-senha.html
-│   ├── index.html
-│   ├── nova-senha.html
-│   └── registrar.html
-├── .gitignore
-├── README.md
-└── LICENSE
+│   ├── css/             # UI Components, Global e Pages
+│   ├── js/              # Lógica Client-side (Vanilla JS)
+│   └── *.html           # Views (SPA Principal e Fluxos de Auth)
+└── README.md
 ```
 
-## Fluxo de Autenticação
-
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  Registro    │────▶│  Email       │────▶│  Confirmação │
-│  /registrar  │     │  (código)    │     │  /verificar  │
-└──────────────┘     └──────────────┘     └──────────────┘
-                                                    │
-                                                    ▼
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  App         │◀────│  Login       │◀────│  JWT Token   │
-│  (protegido) │     │  /login      │     │  Gerado      │
-└──────────────┘     └──────────────┘     └──────────────┘
-```
-
-## Segurança
+## 🔒 Segurança Aplicada
 
 - ✅ Senhas criptografadas com bcrypt (salt rounds: 10)
-- ✅ Access tokens JWT (expiração: 8h)
-- ✅ Refresh tokens com rotação (expiração: 7 dias)
-- ✅ Cookies httpOnly com SameSite=Strict
-- ✅ Rate limiting em todas as rotas de autenticação
-- ✅ Validação de input em todos os endpoints
+- ✅ Access tokens JWT curtos + Refresh tokens com rotação
+- ✅ Defesa contra SQL Injection via consultas parametrizadas (pg)
+- ✅ Validação robusta de payloads na API
+- ✅ Tratamento de CORS para comunicação Frontend-Backend
 
-## Desenvolvimento
+## 📄 Licença
 
-```bash
-# Servidor com hot reload (futuro)
-npm run dev
-
-# Executar migrações
-npm run migrate
-
-# Ver logs do servidor
-npm start
-```
-
-## Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+Este projeto é proprietário e possui todos os direitos reservados (All Rights Reserved). É estritamente proibida a cópia, modificação, distribuição, sublicenciamento e/ou venda deste software, parcial ou integralmente. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
-Desenvolvido com ☕ e JavaScript.
+Desenvolvido com ☕ e JavaScript por [Kaik Lopes](https://github.com/KaikLopes).
