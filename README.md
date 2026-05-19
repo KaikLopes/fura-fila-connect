@@ -2,7 +2,7 @@
 
 Sistema SaaS para clínicas com Recuperação Inteligente de Agendamentos. Converte horários vagos em lucro automatizando o contato com a fila de espera via WhatsApp.
 
-🔗 [Acessar o Projeto Online](#) | 💼 [Meu Portfólio](https://github.com/KaikLopes)
+🔗 [Acessar o Projeto Online](furafilaconnect.kaikloepsdev.com.br) | 💼 [Meu Portfólio](https://kaiklopesdev.com.br)
 
 ## 🌟 O Diferencial: Taxa de Recuperação Inteligente
 
