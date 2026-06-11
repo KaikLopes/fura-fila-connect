@@ -238,6 +238,27 @@ services:
     networks:
       - furafila_network
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: furafila_frontend
+    ports:
+      - "5500:5500"
+    depends_on:
+      - api-gateway
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5500/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - furafila_network
+
 volumes:
   postgres_data:
     driver: local
