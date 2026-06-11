@@ -1,0 +1,28 @@
+{
+  "name": "@furafila/auth-service",
+  "version": "1.0.0",
+  "description": "Auth Service - Autenticação, JWT e gerenciamento de usuários",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest"
+  },
+  "keywords": ["auth", "jwt", "authentication"],
+  "author": "FuraFila Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "helmet": "^8.1.0",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^8.3.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^8.0.7",
+    "pg": "^8.13.1",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

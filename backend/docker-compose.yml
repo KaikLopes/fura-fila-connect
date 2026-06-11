@@ -1,0 +1,259 @@
+version: '3.9'
+
+services:
+  # ── Database ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: furafila_postgres
+    environment:
+      POSTGRES_DB: furafila_connect
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - furafila_network
+
+  # ── Redis (Cache & Session) ───────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: furafila_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - furafila_network
+
+  # ── API Gateway ──────────────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.gateway
+    container_name: furafila_gateway
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - AGENDA_SERVICE_URL=http://agenda-service:3002
+      - PROFISSIONAIS_SERVICE_URL=http://profissionais-service:3003
+      - CLIENTES_SERVICE_URL=http://clientes-service:3004
+      - DASHBOARD_SERVICE_URL=http://dashboard-service:3005
+      - CONFIGURACOES_SERVICE_URL=http://configuracoes-service:3006
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - furafila_network
+
+  # ── Auth Service ──────────────────────────────────────────────────────
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.service
+    container_name: furafila_auth
+    environment:
+      - AUTH_SERVICE_PORT=3001
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=furafila_connect
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - GATEWAY_URL=http://api-gateway:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - furafila_network
+
+  # ── Agenda Service ─────────────────────────────────────────────────────
+  agenda-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.service
+    container_name: furafila_agenda
+    environment:
+      - SERVICE_NAME=agenda-service
+      - AGENDA_SERVICE_PORT=3002
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=furafila_connect
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - GATEWAY_URL=http://api-gateway:3000
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - furafila_network
+
+  # ── Profissionais Service ──────────────────────────────────────────────
+  profissionais-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.service
+    container_name: furafila_profissionais
+    environment:
+      - SERVICE_NAME=profissionais-service
+      - PROFISSIONAIS_SERVICE_PORT=3003
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=furafila_connect
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - GATEWAY_URL=http://api-gateway:3000
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - furafila_network
+
+  # ── Clientes Service ────────────────────────────────────────────────────
+  clientes-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.service
+    container_name: furafila_clientes
+    environment:
+      - SERVICE_NAME=clientes-service
+      - CLIENTES_SERVICE_PORT=3004
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=furafila_connect
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - GATEWAY_URL=http://api-gateway:3000
+    ports:
+      - "3004:3004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - furafila_network
+
+  # ── Dashboard Service ───────────────────────────────────────────────────
+  dashboard-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.service
+    container_name: furafila_dashboard
+    environment:
+      - SERVICE_NAME=dashboard-service
+      - DASHBOARD_SERVICE_PORT=3005
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=furafila_connect
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - GATEWAY_URL=http://api-gateway:3000
+    ports:
+      - "3005:3005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - furafila_network
+
+  # ── Configurações Service ───────────────────────────────────────────────
+  configuracoes-service:
+    build:
+      context: .
+      dockerfile: services/Dockerfile.service
+    container_name: furafila_configuracoes
+    environment:
+      - SERVICE_NAME=configuracoes-service
+      - CONFIGURACOES_SERVICE_PORT=3006
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=furafila_connect
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - GATEWAY_URL=http://api-gateway:3000
+    ports:
+      - "3006:3006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - furafila_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  furafila_network:
+    driver: bridge

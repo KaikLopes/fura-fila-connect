@@ -1,0 +1,10 @@
+{
+  "name": "@furafila/shared-libs",
+  "version": "1.0.0",
+  "description": "Bibliotecas compartilhadas para todos os microserviços",
+  "main": "index.js",
+  "keywords": ["microservices", "logger", "health-check", "circuit-breaker"],
+  "author": "FuraFila Team",
+  "license": "MIT",
+  "dependencies": {}
+}
